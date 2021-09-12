@@ -2,68 +2,80 @@ import request from 'supertest'
 import faker from 'faker'
 
 import App from '@Configs/server'
-
-jest.mock('typeorm', () => ({
-  createConnection: jest.fn().mockResolvedValue({})
-}))
+import UserAggregator from '@Aggregators/UserAggregator'
+import i18n from '@Configs/i18n'
 
 describe('User actions', () => {
-  describe('Register', () => {
+  describe('Authentication', () => {
     it('is a valid user', async () => {
-      const response = await request(App).post('/v1/users').send({ email: faker.internet.email(), password: faker.internet.password() })
+      const token = 'example token'
+      const email = faker.internet.email()
+      const password = faker.internet.password()
+      const mockAuth = jest.fn().mockResolvedValue(token)
+
+      jest.spyOn(UserAggregator, 'auth').mockImplementation(mockAuth)
+
+      const response = await request(App).post('/v1/auth').send({ email, password })
 
       expect(response.statusCode).toBe(200)
+      expect(response.body.token).toBe(token)
+      expect(mockAuth).toHaveBeenCalledWith(email, password)
     })
 
-    it('is a invalid user', async () => {
-      const response = await request(App).post('/v1/users')
+    it('is an invalid authentication when is not sent email', async () => {
+      const token = 'example token'
+      const email = undefined
+      const password = faker.internet.password()
+      const mockAuth = jest.fn().mockResolvedValue(token)
+
+      jest.spyOn(UserAggregator, 'auth').mockImplementation(mockAuth)
+
+      const response = await request(App).post('/v1/auth').send({ email, password })
 
       expect(response.statusCode).toBe(400)
       expect(response.body).toMatchObject({
         ok: false,
         error: {
+          message: i18n.__('required-field', { field: i18n.__('user.fields.email') }),
           name: 'ValidationError',
-          message: 'email é obrigatório. senha é obrigatório'
         }
       })
     })
 
-    it('is a invalid user', async () => {
-      const response = await request(App).post('/v1/users').send({ password: faker.internet.password() })
+    it('is an invalid authentication when is not sent password', async () => {
+      const token = 'example token'
+      const email = faker.internet.email()
+      const password = undefined
+      const mockAuth = jest.fn().mockResolvedValue(token)
+
+      jest.spyOn(UserAggregator, 'auth').mockImplementation(mockAuth)
+
+      const response = await request(App).post('/v1/auth').send({ email, password })
 
       expect(response.statusCode).toBe(400)
       expect(response.body).toMatchObject({
         ok: false,
         error: {
+          message: i18n.__('required-field', { field: i18n.__('user.fields.password') }),
           name: 'ValidationError',
-          message: 'email é obrigatório'
         }
       })
     })
 
-    it('is a invalid user', async () => {
-      const response = await request(App).post('/v1/users').send({ email: faker.internet.email() })
+    it('is an invalid authentication when user aggregator throwns an error', async () => {
+      const email = faker.internet.email()
+      const password = faker.internet.password()
+      const error = { ...new Error('Example error') }
+      const mockAuth = jest.fn().mockRejectedValue(error)
+
+      jest.spyOn(UserAggregator, 'auth').mockImplementation(mockAuth)
+
+      const response = await request(App).post('/v1/auth').send({ email, password })
 
       expect(response.statusCode).toBe(400)
       expect(response.body).toMatchObject({
         ok: false,
-        error: {
-          name: 'ValidationError',
-          message: 'senha é obrigatório'
-        }
-      })
-    })
-
-    it('is a invalid user', async () => {
-      const response = await request(App).post('/v1/users').send({ email: faker.name.firstName(), password: faker.internet.password() })
-
-      expect(response.statusCode).toBe(400)
-      expect(response.body).toMatchObject({
-        ok: false,
-        error: {
-          name: 'ValidationError',
-          message: 'email precisa ser um e-mail'
-        }
+        error
       })
     })
   })

@@ -6,6 +6,8 @@ export class UserAggregator {
 
   constructor(accountServiceClient: AccountServiceClient) {
     this._accountServiceClient = accountServiceClient
+
+    this.auth = this.auth.bind(this)
   }
 
   async auth(email: string, password: string) {

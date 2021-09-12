@@ -4,12 +4,12 @@ import i18n from '@Configs/i18n'
 
 export const authUserSchema = Joi.object({
   email: Joi.string().email().required().messages({
-    'string.email': i18n.__('invalid-email', { field: 'email' }),
-    'string.empty': i18n.__('empty-field', { field: 'email' }),
-    'any.required': i18n.__('required-field', { field: 'email' })
+    'string.email': i18n.__('invalid-email', { field: i18n.__('user.fields.email') }),
+    'string.empty': i18n.__('empty-field', { field: i18n.__('user.fields.email') }),
+    'any.required': i18n.__('required-field', { field: i18n.__('user.fields.email') })
   }),
   password: Joi.string().required().messages({
-    'string.empty': i18n.__('empty-field', { field: 'senha' }),
-    'any.required': i18n.__('required-field', { field: 'senha' })
+    'string.empty': i18n.__('empty-field', { field: i18n.__('user.fields.password') }),
+    'any.required': i18n.__('required-field', { field: i18n.__('user.fields.password') })
   }),
 }).options({ abortEarly: false })

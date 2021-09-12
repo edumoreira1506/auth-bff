@@ -5,5 +5,7 @@
 	"required-field": "{{field}} é obrigatório",
 	"validated": "Válido!",
 	"app.title": "CIG: Plataforma de Comercialização de Índio Gigante",
-	"app.description": "Documentação da API"
+	"app.description": "Documentação da API",
+	"user.fields.email": "E-mail",
+	"user.fields.password": "Senha"
 }
