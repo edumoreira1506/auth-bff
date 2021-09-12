@@ -13,3 +13,8 @@ export const authUserSchema = Joi.object({
     'any.required': i18n.__('required-field', { field: i18n.__('user.fields.password') })
   }),
 }).options({ abortEarly: false })
+
+export const storeUserSchema = Joi.object({
+  poultry: Joi.object().required(),
+  user: Joi.object().required()
+})

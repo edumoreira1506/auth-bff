@@ -6,6 +6,7 @@ import UserAggregator from '@Aggregators/UserAggregator'
 class UserController {
   constructor() {
     this.auth = this.auth.bind(this)
+    this.store = this.store.bind(this)
   }
 
   @BaseController.errorHandler()
@@ -16,6 +17,11 @@ class UserController {
     const token = await UserAggregator.auth(email, password)
 
     return BaseController.successResponse(res, { token })
+  }
+
+  @BaseController.errorHandler()
+  async store(req: Request, res: Response): Promise<void> {
+    console.log('chegou aqui')
   }
 }
 
