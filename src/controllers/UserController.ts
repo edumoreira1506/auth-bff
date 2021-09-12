@@ -1,14 +1,21 @@
 import { Request, Response } from 'express'
+import { BaseController } from '@cig-platform/core'
 
-import i18n from '@Configs/i18n'
+import UserAggregator from '@Aggregators/UserAggregator'
 
 class UserController {
   constructor() {
-    this.store = this.store.bind(this)
+    this.auth = this.auth.bind(this)
   }
 
-  async store(_: Request, res: Response): Promise<Response> {
-    return res.send({ message: i18n.__('validated') })
+  @BaseController.errorHandler()
+  async auth(req: Request, res: Response): Promise<Response> {
+    const email = req.body.email
+    const password = req.body.password
+
+    const token = await UserAggregator.auth(email, password)
+
+    return BaseController.successResponse(res, { token })
   }
 }
 
