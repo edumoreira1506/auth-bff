@@ -4,7 +4,6 @@
 
 ```
 NodeJS >= 14.17.3
-Postgres >= 13
 ```
 
 ## Setup
@@ -48,12 +47,4 @@ For run eslint.
 
 ```console
 $ npm run lint
-```
-
-## Database
-
-To run migrations.
-
-```console
-$ npm run db:migrate
 ```

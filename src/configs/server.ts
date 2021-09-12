@@ -4,8 +4,6 @@ import cors from 'cors'
 import routes from '@Routes/index'
 import swaggerConfig from '@Configs/swagger'
 
-import '@Configs/database'
-
 const App = express()
 
 App.use(cors({ origin: '*' }))
