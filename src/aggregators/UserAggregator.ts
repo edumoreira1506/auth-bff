@@ -11,6 +11,7 @@ export class UserAggregator {
     this._poultryServiceClient = poultryServiceClient
 
     this.auth = this.auth.bind(this)
+    this.store = this.store.bind(this)
   }
 
   async auth(email: string, password: string) {
