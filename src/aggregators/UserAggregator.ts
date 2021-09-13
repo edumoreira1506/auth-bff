@@ -1,4 +1,4 @@
-import { AccountServiceClient, PoultryServiceClient, AuthError, IPoultry, IUser } from '@cig-platform/core'
+import { AccountServiceClient, PoultryServiceClient, IPoultry, IUser } from '@cig-platform/core'
 import { ACCOUNT_SERVICE_URL } from '@Constants/account'
 import { POULTRY_SERVICE_URL } from '@Constants/poultry'
 
@@ -16,14 +16,15 @@ export class UserAggregator {
   async auth(email: string, password: string) {
     const token = await this._accountServiceClient.authUser(email, password)
 
-    if (!token) throw new AuthError()
-
     return token
   }
 
-  async store(user: IUser, poultry: IPoultry) {
+  async store(user: Partial<IUser>, poultry: Partial<IPoultry>) {
     const userData = await this._accountServiceClient.postUser(user)
     const poultryData = await this._poultryServiceClient.postPoultry(poultry)
+    const poultryUserData = await this._poultryServiceClient.postPoultryUser({ userId: userData.id, poultryId: poultryData.id })
+
+    return { user: userData, poultry: poultryData, poultryUser: poultryUserData }
   }
 }
 

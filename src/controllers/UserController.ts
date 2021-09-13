@@ -20,8 +20,12 @@ class UserController {
   }
 
   @BaseController.errorHandler()
-  async store(req: Request, res: Response): Promise<void> {
-    console.log('chegou aqui')
+  async store(req: Request, res: Response): Promise<Response> {
+    const { poultry, user } = req.body
+
+    const entities = await UserAggregator.store(user, poultry)
+
+    return BaseController.successResponse(res, entities)
   }
 }
 
