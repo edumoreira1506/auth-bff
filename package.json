@@ -18,6 +18,7 @@
 	"dependencies": {
 		"@cig-platform/core": "^0.2.36",
 		"@cig-platform/docs": "^0.3.3",
+		"@cig-platform/types": "0.0.1",
 		"cors": "^2.8.5",
 		"dotenv": "^10.0.0",
 		"express": "^4.17.1",
