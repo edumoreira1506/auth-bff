@@ -91,7 +91,7 @@ describe('User actions', () => {
       jest.spyOn(UserAggregator, 'store').mockImplementation(mockStore)
 
       const response = await request(App).post('/v1/users').send({ user, poultry })
-      const userWithDateString = { ...user, birthDate: user.birthDate.toISOString() }
+      const userWithDateString = { ...user, birthDate: user?.birthDate?.toISOString() }
 
       expect(response.statusCode).toBe(200)
       expect(response.body).toMatchObject({
@@ -141,7 +141,7 @@ describe('User actions', () => {
         ok: false,
         error
       })
-      expect(mockStore).toHaveBeenCalledWith({ ...user, birthDate: user.birthDate.toISOString() }, poultry)
+      expect(mockStore).toHaveBeenCalledWith({ ...user, birthDate: user?.birthDate?.toISOString() }, poultry)
     })
   })
 })

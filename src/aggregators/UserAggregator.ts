@@ -1,4 +1,6 @@
-import { AccountServiceClient, PoultryServiceClient, IPoultry, IUser } from '@cig-platform/core'
+import { IPoultry, IUser } from '@cig-platform/types'
+import { AccountServiceClient, PoultryServiceClient } from '@cig-platform/core'
+
 import { ACCOUNT_SERVICE_URL } from '@Constants/account'
 import { POULTRY_SERVICE_URL } from '@Constants/poultry'
 
