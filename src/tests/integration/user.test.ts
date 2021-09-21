@@ -1,6 +1,6 @@
 import request from 'supertest'
 import faker from 'faker'
-import { userFactory, poultryFactory, poultryUserFactory } from '@cig-platform/core'
+import { userFactory, poultryFactory, poultryUserFactory } from '@cig-platform/factories'
 
 import App from '@Configs/server'
 import UserAggregator from '@Aggregators/UserAggregator'
