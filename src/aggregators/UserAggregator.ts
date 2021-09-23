@@ -18,8 +18,9 @@ export class UserAggregator {
 
   async auth(email: string, password: string) {
     const user = await this._accountServiceClient.authUser(email, password)
+    const poultries = await this._poultryServiceClient.getPoultries(user.id)
 
-    return user
+    return { user, poultries }
   }
 
   async store(user: Partial<IUser>, poultry: Partial<IPoultry>) {
