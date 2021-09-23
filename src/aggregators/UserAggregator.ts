@@ -3,6 +3,7 @@ import { AccountServiceClient, PoultryServiceClient } from '@cig-platform/core'
 
 import { ACCOUNT_SERVICE_URL } from '@Constants/account'
 import { POULTRY_SERVICE_URL } from '@Constants/poultry'
+import TokenService from '@Services/TokenService'
 
 export class UserAggregator {
   private _accountServiceClient: AccountServiceClient;
@@ -19,8 +20,9 @@ export class UserAggregator {
   async auth(email: string, password: string) {
     const user = await this._accountServiceClient.authUser(email, password)
     const poultries = await this._poultryServiceClient.getPoultries(user.id)
+    const token = await TokenService.create(user, poultries)
 
-    return { user, poultries }
+    return { token }
   }
 
   async store(user: Partial<IUser>, poultry: Partial<IPoultry>) {
