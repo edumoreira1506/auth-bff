@@ -14,9 +14,9 @@ class UserController {
     const email = req.body.email
     const password = req.body.password
 
-    const user = await UserAggregator.auth(email, password)
+    const token = await UserAggregator.auth(email, password)
 
-    return BaseController.successResponse(res, { user })
+    return BaseController.successResponse(res, { token })
   }
 
   @BaseController.errorHandler()

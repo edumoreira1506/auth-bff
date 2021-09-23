@@ -22,7 +22,7 @@ export class UserAggregator {
     const poultries = await this._poultryServiceClient.getPoultries(user.id)
     const token = await TokenService.create(user, poultries)
 
-    return { token }
+    return token
   }
 
   async store(user: Partial<IUser>, poultry: Partial<IPoultry>) {
