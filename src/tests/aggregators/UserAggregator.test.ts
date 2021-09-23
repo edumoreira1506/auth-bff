@@ -1,25 +1,59 @@
 import faker from 'faker'
+import { userFactory, poultryFactory } from '@cig-platform/factories'
 
 import { UserAggregator } from '@Aggregators/UserAggregator'
+import TokenService from '@Services/TokenService'
 
 describe('UserAggregator', () => {
   describe('auth', () => {
-    it('returns token when the account service client returns a valid token', async () => {
+    it('returns token when the account service client returns a valid user, and the poultrys service returns valid poultries', async () => {
       const token = 'example token'
+      const user = userFactory()
+      const poultries = Array(10).fill(null).map(() => poultryFactory())
       const mockAccountServiceClient: any = {
-        authUser: jest.fn().mockResolvedValue(token)
+        authUser: jest.fn().mockResolvedValue(user)
       }
-      const userAggregator = new UserAggregator(mockAccountServiceClient, {} as any)
+      const mockPoultryServiceClient: any = {
+        getPoultries: jest.fn().mockResolvedValue(poultries)
+      }
+      const userAggregator = new UserAggregator(mockAccountServiceClient, mockPoultryServiceClient)
+      const mockCreateToken = jest.fn().mockResolvedValue(token)
 
-      expect(await userAggregator.auth(faker.internet.email(), faker.internet.password())).toBe(token)
+      jest.spyOn(TokenService, 'create').mockImplementation(mockCreateToken)
+
+      const email = faker.internet.email()
+      const password = faker.internet.password()
+
+      expect(await userAggregator.auth(email, password)).toBe(token)
+      expect(mockCreateToken).toHaveBeenCalledWith(user, poultries)
+      expect(mockAccountServiceClient.authUser).toHaveBeenCalledWith(email, password)
+      expect(mockPoultryServiceClient.getPoultries).toHaveBeenLastCalledWith(user.id)
     })
 
     it('throwns an error when the account service gets an error', async () => {
       const error = new Error()
+      const poultries = Array(10).fill(null).map(() => poultryFactory())
       const mockAccountServiceClient: any = {
         authUser: jest.fn().mockRejectedValue(error)
       }
-      const userAggregator = new UserAggregator(mockAccountServiceClient, {} as any)
+      const mockPoultryServiceClient: any = {
+        getPoultries: jest.fn().mockResolvedValue(poultries)
+      }
+      const userAggregator = new UserAggregator(mockAccountServiceClient, mockPoultryServiceClient)
+
+      await expect(userAggregator.auth).rejects.toThrow(error)
+    })
+
+    it('throwns an error when the poultry service gets an error', async () => {
+      const error = new Error()
+      const user = userFactory()
+      const mockAccountServiceClient: any = {
+        authUser: jest.fn().mockResolvedValue(user)
+      }
+      const mockPoultryServiceClient: any = {
+        getPoultries: jest.fn().mockRejectedValue(error)
+      }
+      const userAggregator = new UserAggregator(mockAccountServiceClient, mockPoultryServiceClient)
 
       await expect(userAggregator.auth).rejects.toThrow(error)
     })
