@@ -15,6 +15,6 @@ export const authUserSchema = Joi.object({
 }).options({ abortEarly: false })
 
 export const storeUserSchema = Joi.object({
-  poultry: Joi.object().required(),
+  breeder: Joi.object().required(),
   user: Joi.object().required()
 })
