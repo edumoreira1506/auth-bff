@@ -1,17 +1,17 @@
-import { IPoultry, IUser } from '@cig-platform/types'
-import { AccountServiceClient, PoultryServiceClient } from '@cig-platform/core'
+import { IBreeder, IUser } from '@cig-platform/types'
+import { AccountServiceClient, BreederServiceClient } from '@cig-platform/core'
 
 import { ACCOUNT_SERVICE_URL } from '@Constants/account'
-import { POULTRY_SERVICE_URL } from '@Constants/poultry'
+import { BREEDER_SERVICE_URL } from '@Constants/breeder'
 import TokenService from '@Services/TokenService'
 
 export class UserAggregator {
   private _accountServiceClient: AccountServiceClient;
-  private _poultryServiceClient: PoultryServiceClient;
+  private _breederServiceClient: BreederServiceClient;
 
-  constructor(accountServiceClient: AccountServiceClient, poultryServiceClient: PoultryServiceClient) {
+  constructor(accountServiceClient: AccountServiceClient, breederServiceClient: BreederServiceClient) {
     this._accountServiceClient = accountServiceClient
-    this._poultryServiceClient = poultryServiceClient
+    this._breederServiceClient = breederServiceClient
 
     this.auth = this.auth.bind(this)
     this.store = this.store.bind(this)
@@ -19,19 +19,19 @@ export class UserAggregator {
 
   async auth(email: string, password: string) {
     const user = await this._accountServiceClient.authUser(email, password)
-    const poultries = await this._poultryServiceClient.getPoultries(user.id)
-    const token = await TokenService.create(user, poultries)
+    const breeders = await this._breederServiceClient.getBreeders(user.id)
+    const token = await TokenService.create(user, breeders)
 
     return token
   }
 
-  async store(user: Partial<IUser>, poultry: Partial<IPoultry>) {
+  async store(user: Partial<IUser>, breeder: Partial<IBreeder>) {
     const userData = await this._accountServiceClient.postUser(user)
-    const poultryData = await this._poultryServiceClient.postPoultry(poultry)
-    const poultryUserData = await this._poultryServiceClient.postPoultryUser({ userId: userData.id, poultryId: poultryData.id })
+    const breederData = await this._breederServiceClient.postBreeder(breeder)
+    const breederUserData = await this._breederServiceClient.postBreederUser({ userId: userData.id, breederId: breederData.id })
 
-    return { user: userData, poultry: poultryData, poultryUser: poultryUserData }
+    return { user: userData, breeder: breederData, breederUser: breederUserData }
   }
 }
 
-export default new UserAggregator(new AccountServiceClient(ACCOUNT_SERVICE_URL), new PoultryServiceClient(POULTRY_SERVICE_URL))
+export default new UserAggregator(new AccountServiceClient(ACCOUNT_SERVICE_URL), new BreederServiceClient(BREEDER_SERVICE_URL))

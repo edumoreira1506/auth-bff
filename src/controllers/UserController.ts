@@ -21,9 +21,9 @@ class UserController {
 
   @BaseController.errorHandler()
   async store(req: Request, res: Response): Promise<Response> {
-    const { poultry, user } = req.body
+    const { breeder, user } = req.body
 
-    const entities = await UserAggregator.store(user, poultry)
+    const entities = await UserAggregator.store(user, breeder)
 
     return BaseController.successResponse(res, entities)
   }

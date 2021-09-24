@@ -14,7 +14,7 @@ const userDocs = {
     {
       method: 'post',
       title: 'Register user',
-      descriptoin: 'Route to register user and poultry',
+      descriptoin: 'Route to register user and breeder',
       objectSchema: storeUserSchema
     }
   ])

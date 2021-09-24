@@ -1,6 +1,6 @@
 import request from 'supertest'
 import faker from 'faker'
-import { userFactory, poultryFactory, poultryUserFactory } from '@cig-platform/factories'
+import { userFactory, breederFactory, breederUserFactory } from '@cig-platform/factories'
 
 import App from '@Configs/server'
 import UserAggregator from '@Aggregators/UserAggregator'
@@ -84,29 +84,30 @@ describe('User actions', () => {
   describe('Register', () => {
     it('is a valid register', async () => {
       const user = userFactory()
-      const poultry = poultryFactory({ description: 'fake description' })
-      const poultryUser = poultryUserFactory({ userId: user.id, poultryId: poultry.id })
-      const mockStore = jest.fn().mockResolvedValue({ user, poultryUser, poultry })
+      const breeder = breederFactory({ description: 'fake description' })
+      const breederUser = breederUserFactory({ userId: user.id, breederId: breeder.id })
+      const mockStore = jest.fn().mockResolvedValue({ user, breederUser, breeder })
 
       jest.spyOn(UserAggregator, 'store').mockImplementation(mockStore)
 
-      const response = await request(App).post('/v1/users').send({ user, poultry })
+      const response = await request(App).post('/v1/users').send({ user, breeder })
       const userWithDateString = { ...user, birthDate: user?.birthDate?.toISOString() }
+      const breederWithDateString = { ...breeder, foundationDate: breeder.foundationDate.toISOString() }
 
       expect(response.statusCode).toBe(200)
       expect(response.body).toMatchObject({
         ok: true,
         user: userWithDateString,
-        poultry,
+        breeder: breederWithDateString,
       })
-      expect(mockStore).toHaveBeenCalledWith(userWithDateString, poultry)
+      expect(mockStore).toHaveBeenCalledWith(userWithDateString, breederWithDateString)
     })
 
     it('is na invalid register when does not send user', async () => {
       const user = null
-      const poultry = poultryFactory({ description: 'fake description' })
+      const breeder = breederFactory({ description: 'fake description' })
 
-      const response = await request(App).post('/v1/users').send({ user, poultry })
+      const response = await request(App).post('/v1/users').send({ user, breeder })
 
       expect(response.statusCode).toBe(400)
       expect(response.body).toMatchObject({
@@ -114,11 +115,11 @@ describe('User actions', () => {
       })
     })
 
-    it('is na invalid register when does not send poultry', async () => {
+    it('is na invalid register when does not send breeder', async () => {
       const user = userFactory()
-      const poultry = null
+      const breeder = null
 
-      const response = await request(App).post('/v1/users').send({ user, poultry })
+      const response = await request(App).post('/v1/users').send({ user, breeder })
 
       expect(response.statusCode).toBe(400)
       expect(response.body).toMatchObject({
@@ -129,19 +130,22 @@ describe('User actions', () => {
     it('is an invalid register when user aggregator throwns an error', async () => {
       const error = {}
       const user = userFactory()
-      const poultry = poultryFactory({ description: 'fake description' })
+      const breeder = breederFactory({ description: 'fake description' })
       const mockStore = jest.fn().mockRejectedValue(error)
 
       jest.spyOn(UserAggregator, 'store').mockImplementation(mockStore)
 
-      const response = await request(App).post('/v1/users').send({ user, poultry })
+      const response = await request(App).post('/v1/users').send({ user, breeder })
 
       expect(response.statusCode).toBe(400)
       expect(response.body).toMatchObject({
         ok: false,
         error
       })
-      expect(mockStore).toHaveBeenCalledWith({ ...user, birthDate: user?.birthDate?.toISOString() }, poultry)
+      expect(mockStore).toHaveBeenCalledWith(
+        { ...user, birthDate: user?.birthDate?.toISOString() },
+        { ...breeder, foundationDate: breeder?.foundationDate?.toISOString() }
+      )
     })
   })
 })
