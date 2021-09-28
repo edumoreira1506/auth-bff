@@ -3,7 +3,7 @@ import { AuthError, BaseController, BreederServiceClient } from '@cig-platform/c
 import { ApiErrorType } from '@cig-platform/types'
 
 import { AuthenticatedRequest } from '@Types/request'
-import { BREEDER_SERVICE_URL } from '@Constants/breeder'
+import BreederClient from '@Clients/BreederServiceClient'
 
 const withBreederPermisionFactory = (errorCallback: (res: Response, error: ApiErrorType) => Response, breederServiceClient: BreederServiceClient) => async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
   try {
@@ -26,4 +26,4 @@ const withBreederPermisionFactory = (errorCallback: (res: Response, error: ApiEr
   }
 }
 
-export default withBreederPermisionFactory(BaseController.errorResponse, new BreederServiceClient(BREEDER_SERVICE_URL))
+export default withBreederPermisionFactory(BaseController.errorResponse, BreederClient)

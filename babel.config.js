@@ -30,7 +30,8 @@ module.exports = {
           "@Services": "./src/services",
           "@Schemas": "./src/schemas",
           "@Docs": "./src/docs",
-          '@Aggregators': "./src/aggregators"
+          '@Aggregators': "./src/aggregators",
+          '@Clients': "./src/clients"
         },
       },
     ],

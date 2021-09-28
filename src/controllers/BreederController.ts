@@ -1,5 +1,8 @@
-import { Request, Response } from 'express'
+import { Request } from 'express'
 import { BaseController } from '@cig-platform/core'
+
+import BreederServiceClient from '@Clients/BreederServiceClient'
+import i18n from '@Configs/i18n'
 
 class BreederController {
   constructor() {
@@ -7,8 +10,12 @@ class BreederController {
   }
 
   @BaseController.errorHandler()
-  async update(req: Request, res: Response): Promise<Response> {
-    return BaseController.successResponse(res, { message: 'deu boa!' })
+  @BaseController.actionHandler(i18n.__('common.updated'))
+  async update(req: Request) {
+    const breeder = req.body.breeder
+    const breederId = req.params.breederId
+
+    await BreederServiceClient.updateBreeder(breederId, breeder)
   }
 }
 

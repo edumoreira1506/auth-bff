@@ -2,7 +2,7 @@ import { IBreeder, IUser } from '@cig-platform/types'
 import { AccountServiceClient, BreederServiceClient } from '@cig-platform/core'
 
 import { ACCOUNT_SERVICE_URL } from '@Constants/account'
-import { BREEDER_SERVICE_URL } from '@Constants/breeder'
+import BreederClient from '@Clients/BreederServiceClient'
 import TokenService from '@Services/TokenService'
 
 export class UserAggregator {
@@ -34,4 +34,4 @@ export class UserAggregator {
   }
 }
 
-export default new UserAggregator(new AccountServiceClient(ACCOUNT_SERVICE_URL), new BreederServiceClient(BREEDER_SERVICE_URL))
+export default new UserAggregator(new AccountServiceClient(ACCOUNT_SERVICE_URL), BreederClient)
