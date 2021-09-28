@@ -17,7 +17,7 @@
 	"homepage": "",
 	"dependencies": {
 		"@cig-platform/core": "^0.4.5",
-		"@cig-platform/docs": "^0.3.3",
+		"@cig-platform/docs": "^0.4.4",
 		"@cig-platform/factories": "0.0.3",
 		"@cig-platform/types": "0.0.3",
 		"cors": "^2.8.5",
