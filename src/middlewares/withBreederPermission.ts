@@ -5,7 +5,7 @@ import { ApiErrorType } from '@cig-platform/types'
 import { AuthenticatedRequest } from '@Types/request'
 import BreederClient from '@Clients/BreederServiceClient'
 
-const withBreederPermisionFactory = (errorCallback: (res: Response, error: ApiErrorType) => Response, breederServiceClient: BreederServiceClient) => async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+export const withBreederPermisionFactory = (errorCallback: (res: Response, error: ApiErrorType) => Response, breederServiceClient: BreederServiceClient) => async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
   try {
     const user = req.user
 

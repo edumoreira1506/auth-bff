@@ -3,10 +3,10 @@ import { AccountServiceClient, AuthError, BaseController } from '@cig-platform/c
 import { ApiErrorType } from '@cig-platform/types'
 
 import TokenService from '@Services/TokenService'
-import { ACCOUNT_SERVICE_URL } from '@Constants/account'
+import AccountClient from '@Clients/AccountServiceClient'
 import { AuthenticatedRequest } from '@Types/request'
 
-const withTokenAuthorizationFactory = (errorCallback: (res: Response, error: ApiErrorType) => Response, accountServiceClient: AccountServiceClient) => async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+export const withTokenAuthorizationFactory = (errorCallback: (res: Response, error: ApiErrorType) => Response, accountServiceClient: AccountServiceClient) => async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
   try {
     const token = req.header('X-Cig-Token')
 
@@ -28,4 +28,4 @@ const withTokenAuthorizationFactory = (errorCallback: (res: Response, error: Api
   }
 }
 
-export default withTokenAuthorizationFactory(BaseController.errorResponse, new AccountServiceClient(ACCOUNT_SERVICE_URL))
+export default withTokenAuthorizationFactory(BaseController.errorResponse, AccountClient)
