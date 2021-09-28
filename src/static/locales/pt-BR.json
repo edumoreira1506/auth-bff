@@ -7,5 +7,7 @@
 	"app.title": "CIG: Plataforma de Comercialização de Índio Gigante",
 	"app.description": "Documentação da API",
 	"user.fields.email": "E-mail",
-	"user.fields.password": "Senha"
+	"user.fields.password": "Senha",
+	"auth.errors.invalid-login": "Falha de autenticação",
+	"common.updated": "Atualizado com sucesso!"
 }

@@ -42,6 +42,9 @@
       "@Controllers/*": [
         "src/controllers/*"
       ],
+      "@Clients/*": [
+        "src/clients/*"
+      ],
       "@Repositories/*": [
         "src/repositories/*"
       ],
