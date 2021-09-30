@@ -5,6 +5,8 @@ import { userFactory, breederFactory, breederUserFactory } from '@cig-platform/f
 import App from '@Configs/server'
 import UserAggregator from '@Aggregators/UserAggregator'
 import i18n from '@Configs/i18n'
+import TokenService from '@Services/TokenService'
+import AccountServiceClient from '@Clients/AccountServiceClient'
 
 describe('User actions', () => {
   describe('Authentication', () => {
@@ -146,6 +148,74 @@ describe('User actions', () => {
         { ...user, birthDate: user?.birthDate?.toISOString() },
         { ...breeder, foundationDate: breeder?.foundationDate?.toISOString() }
       )
+    })
+  })
+
+  describe('Refresh token', () => {
+    it('is a valid refresh', async () => {
+      const user = userFactory()
+      const token = 'token'
+      const mockRefreshToken = jest.fn().mockResolvedValue(token)
+      const mockOpen = jest.fn().mockResolvedValue(user)
+      const mockGetUser = jest.fn().mockResolvedValue(user)
+
+      jest.spyOn(UserAggregator, 'refreshToken').mockImplementation(mockRefreshToken)
+      jest.spyOn(TokenService, 'open').mockImplementation(mockOpen)
+      jest.spyOn(AccountServiceClient, 'getUser').mockImplementation(mockGetUser)
+
+      const response = await request(App).post('/v1/refresh-token').set('X-Cig-Token', token)
+
+      expect(response.statusCode).toBe(200)
+      expect(response.body.token).toBe(token)
+      expect(mockOpen).toHaveBeenCalledWith(token)
+      expect(mockRefreshToken).toHaveBeenCalledWith(user)
+      expect(mockGetUser).toHaveBeenCalledWith(user.id)
+    })
+
+    it('is an invalid refresh when send an invalid token', async () => {
+      const user = userFactory()
+      const token = ''
+      const mockRefreshToken = jest.fn().mockResolvedValue(token)
+      const mockOpen = jest.fn().mockResolvedValue(user)
+      const mockGetUser = jest.fn().mockResolvedValue(user)
+
+      jest.spyOn(UserAggregator, 'refreshToken').mockImplementation(mockRefreshToken)
+      jest.spyOn(TokenService, 'open').mockImplementation(mockOpen)
+      jest.spyOn(AccountServiceClient, 'getUser').mockImplementation(mockGetUser)
+
+      const response = await request(App).post('/v1/refresh-token').set('X-Cig-Token', token)
+
+      expect(response.statusCode).toBe(400)
+      expect(response.body.error).toMatchObject({
+        name: 'AuthError',
+        message: String(i18n.__('auth.errors.invalid-login'))
+      })
+      expect(mockOpen).not.toHaveBeenCalledWith(token)
+      expect(mockRefreshToken).not.toHaveBeenCalledWith(user)
+      expect(mockGetUser).not.toHaveBeenCalledWith(user.id)
+    })
+
+    it('is an invalid refresh when is invalid token', async () => {
+      const user = userFactory()
+      const token = 'token'
+      const mockRefreshToken = jest.fn().mockResolvedValue(token)
+      const mockOpen = jest.fn().mockResolvedValue(null)
+      const mockGetUser = jest.fn().mockResolvedValue(user)
+
+      jest.spyOn(UserAggregator, 'refreshToken').mockImplementation(mockRefreshToken)
+      jest.spyOn(TokenService, 'open').mockImplementation(mockOpen)
+      jest.spyOn(AccountServiceClient, 'getUser').mockImplementation(mockGetUser)
+
+      const response = await request(App).post('/v1/refresh-token').set('X-Cig-Token', token)
+
+      expect(response.statusCode).toBe(400)
+      expect(response.body.error).toMatchObject({
+        name: 'AuthError',
+        message: String(i18n.__('auth.errors.invalid-login'))
+      })
+      expect(mockOpen).toHaveBeenCalledWith(token)
+      expect(mockRefreshToken).not.toHaveBeenCalledWith(user)
+      expect(mockGetUser).not.toHaveBeenCalledWith(user.id)
     })
   })
 })

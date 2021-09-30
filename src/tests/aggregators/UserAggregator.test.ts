@@ -1,5 +1,6 @@
 import faker from 'faker'
 import { userFactory, breederFactory } from '@cig-platform/factories'
+import { IBreeder } from '@cig-platform/types'
 
 import { UserAggregator } from '@Aggregators/UserAggregator'
 import TokenService from '@Services/TokenService'
@@ -122,6 +123,28 @@ describe('UserAggregator', () => {
       const userAggregator = new UserAggregator(mockAccountServiceClient, mockBreederServiceClient)
 
       await expect(userAggregator.store).rejects.toThrow(error)
+    })
+  })
+
+  describe('refreshToken', () => {
+    it('returns the token', async () => {
+      const user = userFactory()
+      const token = 'token'
+      const breeders: IBreeder[] = []
+
+      const mockCreateToken = jest.fn().mockResolvedValue(token)
+
+      jest.spyOn(TokenService, 'create').mockImplementation(mockCreateToken)
+
+      const mockAccountServiceClient: any = {}
+      const mockBreederServiceClient: any = {
+        getBreeders: jest.fn().mockReturnValue(breeders),
+      }
+      const userAggregator = new UserAggregator(mockAccountServiceClient, mockBreederServiceClient)
+
+      expect(await userAggregator.refreshToken(user)).toBe(token)
+      expect(mockCreateToken).toHaveBeenLastCalledWith(user, breeders)
+      expect(mockBreederServiceClient.getBreeders).toHaveBeenCalledWith(user.id)
     })
   })
 })
