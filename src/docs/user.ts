@@ -10,6 +10,14 @@ const userDocs = {
       objectSchema: authUserSchema
     } 
   ]),
+  ...createDoc('/refresh-token', ['Auth'], [
+    {
+      method: 'post',
+      title: 'Refresh token',
+      description: 'Route to refresh the token',
+      headerParams: [{ type: 'string', name: 'X-Cig-Token' }]
+    }
+  ]),
   ...createDoc('/users', ['Users'], [
     {
       method: 'post',
@@ -17,7 +25,7 @@ const userDocs = {
       descriptoin: 'Route to register user and breeder',
       objectSchema: storeUserSchema
     }
-  ])
+  ]),
 }
 
 export default userDocs
