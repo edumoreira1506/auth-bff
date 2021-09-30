@@ -25,6 +25,13 @@ export class UserAggregator {
     return token
   }
 
+  async refreshToken(user: IUser) {
+    const breeders = await this._breederServiceClient.getBreeders(user.id)
+    const token = await TokenService.create(user as any, breeders)
+
+    return token
+  }
+
   async store(user: Partial<IUser>, breeder: Partial<IBreeder>) {
     const userData = await this._accountServiceClient.postUser(user)
     const breederData = await this._breederServiceClient.postBreeder(breeder)
