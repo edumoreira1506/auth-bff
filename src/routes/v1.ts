@@ -11,6 +11,8 @@ const router = express.Router()
 
 router.post('/auth', withBodyValidation(authUserSchema), UserController.auth)
 
+router.post('/refresh-token', withTokenAuthorization, UserController.refreshToken)
+
 router.post('/users', withBodyValidation(storeUserSchema), UserController.store)
 
 router.patch('/breeders/:breederId', withTokenAuthorization, withBreederPermission, BreederController.update)

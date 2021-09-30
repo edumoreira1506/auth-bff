@@ -1,7 +1,8 @@
 import { Request, Response } from 'express'
-import { BaseController } from '@cig-platform/core'
+import { AuthError, BaseController } from '@cig-platform/core'
 
 import UserAggregator from '@Aggregators/UserAggregator'
+import { AuthenticatedRequest } from '@Types/request'
 
 class UserController {
   constructor() {
@@ -15,6 +16,15 @@ class UserController {
     const password = req.body.password
 
     const token = await UserAggregator.auth(email, password)
+
+    return BaseController.successResponse(res, { token })
+  }
+
+  @BaseController.errorHandler()
+  async refreshToken(req: AuthenticatedRequest, res: Response) {
+    if (!req.user) throw new AuthError()
+
+    const token = await UserAggregator.refreshToken(req.user)
 
     return BaseController.successResponse(res, { token })
   }
