@@ -20,14 +20,14 @@ export class UserAggregator {
   async auth(email: string, password: string) {
     const user = await this._accountServiceClient.authUser(email, password)
     const breeders = await this._breederServiceClient.getBreeders(user.id)
-    const token = await TokenService.create(user, breeders)
+    const token = await TokenService.create(user, breeders as any)
 
     return token
   }
 
   async refreshToken(user: IUser) {
     const breeders = await this._breederServiceClient.getBreeders(user.id)
-    const token = await TokenService.create(user as any, breeders)
+    const token = await TokenService.create(user as any, breeders  as any)
 
     return token
   }
