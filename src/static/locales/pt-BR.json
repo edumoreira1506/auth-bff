@@ -9,5 +9,9 @@
 	"user.fields.email": "E-mail",
 	"user.fields.password": "Senha",
 	"auth.errors.invalid-login": "Falha de autenticação",
-	"common.updated": "Atualizado com sucesso!"
+	"common.errors.invalid-email": "E-mail não encontrado",
+	"common.updated": "Atualizado com sucesso!",
+	"messages.recover-password.success": "E-mail enviado com sucesso",
+	"emails.recover-password.title": "Recuperação de senha",
+	"emails.recover-password.content": "Sua senha é: {{password}}"
 }

@@ -1,1 +1,1 @@
-export const BREEDER_SERVICE_URL = String(process.env.BREEDER_SERVICE_URL)
+export const POULTRY_SERVICE_URL = String(process.env.POULTRY_SERVICE_URL)

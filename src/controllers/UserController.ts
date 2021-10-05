@@ -3,6 +3,7 @@ import { AuthError, BaseController } from '@cig-platform/core'
 
 import UserAggregator from '@Aggregators/UserAggregator'
 import { AuthenticatedRequest } from '@Types/request'
+import i18n from '@Configs/i18n'
 
 class UserController {
   constructor() {
@@ -36,6 +37,14 @@ class UserController {
     const entities = await UserAggregator.store(user, breeder)
 
     return BaseController.successResponse(res, entities)
+  }
+
+  @BaseController.errorHandler()
+  @BaseController.actionHandler(i18n.__('messages.recover-password.success'))
+  async recoverPassword(req: Request): Promise<void> {
+    const { email } = req.body
+
+    await UserAggregator.recoverPassword(email)
   }
 }
 
