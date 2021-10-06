@@ -4,6 +4,10 @@ import { IBreeder } from '@cig-platform/types'
 
 import { UserAggregator } from '@Aggregators/UserAggregator'
 import TokenService from '@Services/TokenService'
+import EncryptService from '@Services/EncryptService'
+import EmailService from '@Services/EmailService'
+import i18n from '@Configs/i18n'
+import InvalidEmailError from '@Errors/InvalidEmailError'
 
 describe('UserAggregator', () => {
   describe('auth', () => {
@@ -145,6 +149,45 @@ describe('UserAggregator', () => {
       expect(await userAggregator.refreshToken(user)).toBe(token)
       expect(mockCreateToken).toHaveBeenLastCalledWith(user, breeders)
       expect(mockPoultryServiceClient.getBreeders).toHaveBeenCalledWith(user.id)
+    })
+  })
+
+  describe('recoverPassword', () => {
+    it('send and email when the api returns a valid user', async () => {
+      const email = faker.internet.email()
+      const password = faker.internet.password()
+      const user = userFactory({ email, password })
+      const mockAccountServiceClient: any = {
+        getUsers: jest.fn().mockResolvedValue([user])
+      }
+      const mockDecrypt = jest.fn().mockReturnValue(password)
+      const mockSendEmail = jest.fn()
+
+      jest.spyOn(EncryptService, 'decrypt').mockImplementation(mockDecrypt)
+      jest.spyOn(EmailService, 'send').mockImplementation(mockSendEmail)
+
+      const userAggregator = new UserAggregator(mockAccountServiceClient, {} as any)
+
+      await userAggregator.recoverPassword(email)
+
+      expect(mockDecrypt).toHaveBeenCalledWith(user.password)
+      expect(mockAccountServiceClient.getUsers).toHaveBeenCalledWith({ email })
+      expect(mockSendEmail).toHaveBeenCalledWith({
+        emailDestination: user.email,
+        subject: i18n.__('emails.recover-password.title'),
+        message: i18n.__('emails.recover-password.content', { password })
+      })
+    })
+
+    it('throws an error when the api does not return users', async () => {
+      const email = faker.internet.email()
+      const mockAccountServiceClient: any = {
+        getUsers: jest.fn().mockResolvedValue([])
+      }
+
+      const userAggregator = new UserAggregator(mockAccountServiceClient, {} as any)
+
+      await expect(userAggregator.recoverPassword(email)).rejects.toThrow(InvalidEmailError)
     })
   })
 })
