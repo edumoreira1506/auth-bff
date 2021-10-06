@@ -218,4 +218,41 @@ describe('User actions', () => {
       expect(mockGetUser).not.toHaveBeenCalledWith(user.id)
     })
   })
+
+  describe('Recover password', () => {
+    it('is a valid password recovery', async () => {
+      const mockRecoverPassword = jest.fn()
+      const email = faker.internet.email()
+
+      jest.spyOn(UserAggregator, 'recoverPassword').mockImplementation(mockRecoverPassword)
+
+      const response = await request(App).post('/v1/recover-password').send({ email })
+
+      expect(response.statusCode).toBe(200)
+      expect(mockRecoverPassword).toHaveBeenCalledWith(email)
+      expect(response.body).toMatchObject({
+        ok: true,
+        message: i18n.__('messages.recover-password.success')
+      })
+    })
+
+    it('is an invalid password recovery when does not send an email', async () => {
+      const mockRecoverPassword = jest.fn()
+      const email = undefined
+
+      jest.spyOn(UserAggregator, 'recoverPassword').mockImplementation(mockRecoverPassword)
+
+      const response = await request(App).post('/v1/recover-password').send({ email })
+
+      expect(response.statusCode).toBe(400)
+      expect(mockRecoverPassword).not.toHaveBeenCalledWith(email)
+      expect(response.body).toMatchObject({
+        ok: false,
+        error: {
+          name: 'ValidationError',
+          message: i18n.__('required-field', { field: i18n.__('user.fields.email') })
+        }
+      })
+    })
+  })
 })

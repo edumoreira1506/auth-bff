@@ -1,5 +1,5 @@
 import { createDoc } from '@cig-platform/docs'
-import { authUserSchema, storeUserSchema } from '@Schemas/UserSchemas'
+import { authUserSchema, recoverPasswordSchema, storeUserSchema } from '@Schemas/UserSchemas'
 
 const userDocs = {
   ...createDoc('/auth', ['Auth'], [
@@ -22,10 +22,18 @@ const userDocs = {
     {
       method: 'post',
       title: 'Register user',
-      descriptoin: 'Route to register user and breeder',
+      description: 'Route to register user and breeder',
       objectSchema: storeUserSchema
     }
   ]),
+  ...createDoc('/recover-password', ['Auth'], [
+    {
+      method: 'post',
+      title: 'Recover password',
+      description: 'Route to recover user password',
+      objectSchema: recoverPasswordSchema
+    }
+  ])
 }
 
 export default userDocs

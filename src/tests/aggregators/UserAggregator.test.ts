@@ -4,6 +4,10 @@ import { IBreeder } from '@cig-platform/types'
 
 import { UserAggregator } from '@Aggregators/UserAggregator'
 import TokenService from '@Services/TokenService'
+import EncryptService from '@Services/EncryptService'
+import EmailService from '@Services/EmailService'
+import i18n from '@Configs/i18n'
+import InvalidEmailError from '@Errors/InvalidEmailError'
 
 describe('UserAggregator', () => {
   describe('auth', () => {
@@ -14,10 +18,10 @@ describe('UserAggregator', () => {
       const mockAccountServiceClient: any = {
         authUser: jest.fn().mockResolvedValue(user)
       }
-      const mockBreederServiceClient: any = {
+      const mockPoultryServiceClient: any = {
         getBreeders: jest.fn().mockResolvedValue(breeders)
       }
-      const userAggregator = new UserAggregator(mockAccountServiceClient, mockBreederServiceClient)
+      const userAggregator = new UserAggregator(mockAccountServiceClient, mockPoultryServiceClient)
       const mockCreateToken = jest.fn().mockResolvedValue(token)
 
       jest.spyOn(TokenService, 'create').mockImplementation(mockCreateToken)
@@ -28,7 +32,7 @@ describe('UserAggregator', () => {
       expect(await userAggregator.auth(email, password)).toBe(token)
       expect(mockCreateToken).toHaveBeenCalledWith(user, breeders)
       expect(mockAccountServiceClient.authUser).toHaveBeenCalledWith(email, password)
-      expect(mockBreederServiceClient.getBreeders).toHaveBeenLastCalledWith(user.id)
+      expect(mockPoultryServiceClient.getBreeders).toHaveBeenLastCalledWith(user.id)
     })
 
     it('throwns an error when the account service gets an error', async () => {
@@ -37,10 +41,10 @@ describe('UserAggregator', () => {
       const mockAccountServiceClient: any = {
         authUser: jest.fn().mockRejectedValue(error)
       }
-      const mockBreederServiceClient: any = {
+      const mockPoultryServiceClient: any = {
         getBreeders: jest.fn().mockResolvedValue(breeders)
       }
-      const userAggregator = new UserAggregator(mockAccountServiceClient, mockBreederServiceClient)
+      const userAggregator = new UserAggregator(mockAccountServiceClient, mockPoultryServiceClient)
 
       await expect(userAggregator.auth).rejects.toThrow(error)
     })
@@ -51,10 +55,10 @@ describe('UserAggregator', () => {
       const mockAccountServiceClient: any = {
         authUser: jest.fn().mockResolvedValue(user)
       }
-      const mockBreederServiceClient: any = {
+      const mockPoultryServiceClient: any = {
         getBreeders: jest.fn().mockRejectedValue(error)
       }
-      const userAggregator = new UserAggregator(mockAccountServiceClient, mockBreederServiceClient)
+      const userAggregator = new UserAggregator(mockAccountServiceClient, mockPoultryServiceClient)
 
       await expect(userAggregator.auth).rejects.toThrow(error)
     })
@@ -68,11 +72,11 @@ describe('UserAggregator', () => {
       const mockAccountServiceClient: any = {
         postUser: jest.fn().mockResolvedValue(user)
       }
-      const mockBreederServiceClient: any = {
+      const mockPoultryServiceClient: any = {
         postBreeder: jest.fn().mockResolvedValue(breeder),
         postBreederUser: jest.fn().mockResolvedValue(breederUser)
       }
-      const userAggregator = new UserAggregator(mockAccountServiceClient, mockBreederServiceClient)
+      const userAggregator = new UserAggregator(mockAccountServiceClient, mockPoultryServiceClient)
 
       expect(await userAggregator.store({}, {})).toMatchObject({ user, breederUser, breeder })
     })
@@ -84,11 +88,11 @@ describe('UserAggregator', () => {
       const mockAccountServiceClient: any = {
         postUser: jest.fn().mockRejectedValue(error)
       }
-      const mockBreederServiceClient: any = {
+      const mockPoultryServiceClient: any = {
         postBreeder: jest.fn().mockResolvedValue(breeder),
         postBreederUser: jest.fn().mockResolvedValue(breederUser)
       }
-      const userAggregator = new UserAggregator(mockAccountServiceClient, mockBreederServiceClient)
+      const userAggregator = new UserAggregator(mockAccountServiceClient, mockPoultryServiceClient)
 
       await expect(userAggregator.store).rejects.toThrow(error)
     })
@@ -100,11 +104,11 @@ describe('UserAggregator', () => {
       const mockAccountServiceClient: any = {
         postUser: jest.fn().mockResolvedValue(user)
       }
-      const mockBreederServiceClient: any = {
+      const mockPoultryServiceClient: any = {
         postBreeder: jest.fn().mockRejectedValue(error),
         postBreederUser: jest.fn().mockResolvedValue(breederUser)
       }
-      const userAggregator = new UserAggregator(mockAccountServiceClient, mockBreederServiceClient)
+      const userAggregator = new UserAggregator(mockAccountServiceClient, mockPoultryServiceClient)
 
       await expect(userAggregator.store).rejects.toThrow(error)
     })
@@ -116,11 +120,11 @@ describe('UserAggregator', () => {
       const mockAccountServiceClient: any = {
         postUser: jest.fn().mockResolvedValue(user)
       }
-      const mockBreederServiceClient: any = {
+      const mockPoultryServiceClient: any = {
         postBreeder: jest.fn().mockResolvedValue(breeder),
         postBreederUser: jest.fn().mockRejectedValue(error)
       }
-      const userAggregator = new UserAggregator(mockAccountServiceClient, mockBreederServiceClient)
+      const userAggregator = new UserAggregator(mockAccountServiceClient, mockPoultryServiceClient)
 
       await expect(userAggregator.store).rejects.toThrow(error)
     })
@@ -137,14 +141,53 @@ describe('UserAggregator', () => {
       jest.spyOn(TokenService, 'create').mockImplementation(mockCreateToken)
 
       const mockAccountServiceClient: any = {}
-      const mockBreederServiceClient: any = {
+      const mockPoultryServiceClient: any = {
         getBreeders: jest.fn().mockReturnValue(breeders),
       }
-      const userAggregator = new UserAggregator(mockAccountServiceClient, mockBreederServiceClient)
+      const userAggregator = new UserAggregator(mockAccountServiceClient, mockPoultryServiceClient)
 
       expect(await userAggregator.refreshToken(user)).toBe(token)
       expect(mockCreateToken).toHaveBeenLastCalledWith(user, breeders)
-      expect(mockBreederServiceClient.getBreeders).toHaveBeenCalledWith(user.id)
+      expect(mockPoultryServiceClient.getBreeders).toHaveBeenCalledWith(user.id)
+    })
+  })
+
+  describe('recoverPassword', () => {
+    it('send and email when the api returns a valid user', async () => {
+      const email = faker.internet.email()
+      const password = faker.internet.password()
+      const user = userFactory({ email, password })
+      const mockAccountServiceClient: any = {
+        getUsers: jest.fn().mockResolvedValue([user])
+      }
+      const mockDecrypt = jest.fn().mockReturnValue(password)
+      const mockSendEmail = jest.fn()
+
+      jest.spyOn(EncryptService, 'decrypt').mockImplementation(mockDecrypt)
+      jest.spyOn(EmailService, 'send').mockImplementation(mockSendEmail)
+
+      const userAggregator = new UserAggregator(mockAccountServiceClient, {} as any)
+
+      await userAggregator.recoverPassword(email)
+
+      expect(mockDecrypt).toHaveBeenCalledWith(user.password)
+      expect(mockAccountServiceClient.getUsers).toHaveBeenCalledWith({ email })
+      expect(mockSendEmail).toHaveBeenCalledWith({
+        emailDestination: user.email,
+        subject: i18n.__('emails.recover-password.title'),
+        message: i18n.__('emails.recover-password.content', { password })
+      })
+    })
+
+    it('throws an error when the api does not return users', async () => {
+      const email = faker.internet.email()
+      const mockAccountServiceClient: any = {
+        getUsers: jest.fn().mockResolvedValue([])
+      }
+
+      const userAggregator = new UserAggregator(mockAccountServiceClient, {} as any)
+
+      await expect(userAggregator.recoverPassword(email)).rejects.toThrow(InvalidEmailError)
     })
   })
 })
