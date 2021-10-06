@@ -1,2 +1,2 @@
 export const EMAIL_USERNAME = String(process.env.EMAIL_USERNAME)
-export const EMAIL_PASSWOWRD = String(process.env.EMAIL_PASSWOWRD)
+export const EMAIL_PASSWORD = String(process.env.EMAIL_PASSWORD)

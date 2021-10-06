@@ -44,7 +44,7 @@ export class UserAggregator {
 
     const decryptedPassword = EncryptService.decrypt(userOfEmail.password)
     const emailSubject = i18n.__('emails.recover-password.title')
-    const emailText = i18n.__('emails.recover-password.password', { password: decryptedPassword })
+    const emailText = i18n.__('emails.recover-password.content', { password: decryptedPassword })
 
     EmailService.send({ emailDestination: userOfEmail.email, subject: emailSubject, message: emailText })
   }
