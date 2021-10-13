@@ -255,4 +255,58 @@ describe('User actions', () => {
       })
     })
   })
+
+  describe('Edit password', () => {
+    it('is a valid password update', async () => {
+      const user = userFactory()
+      const token = 'token'
+      const mockRefreshToken = jest.fn().mockResolvedValue(token)
+      const mockOpen = jest.fn().mockResolvedValue(user)
+      const mockGetUser = jest.fn().mockResolvedValue(user)
+      const mockEditPassword = jest.fn()
+
+      jest.spyOn(UserAggregator, 'refreshToken').mockImplementation(mockRefreshToken)
+      jest.spyOn(TokenService, 'open').mockImplementation(mockOpen)
+      jest.spyOn(AccountServiceClient, 'getUser').mockImplementation(mockGetUser)
+      jest.spyOn(UserAggregator, 'editPassword').mockImplementation(mockEditPassword)
+
+      const response = await request(App).patch('/v1/users/password').send({
+        password: user.password,
+        confirmPassword: user.confirmPassword
+      }).set('X-Cig-Token', token)
+
+      expect(response.statusCode).toBe(200)
+      expect(mockEditPassword).toHaveBeenCalledWith(user.id, user.password, user.confirmPassword)
+      expect(response.body).toMatchObject({
+        ok: true,
+        message: i18n.__('messages.edit-password.success')
+      })
+    })
+
+    it('is an invalid password update when confirm password is different', async () => {
+      const user = userFactory()
+      const { confirmPassword } = userFactory()
+      const token = 'token'
+      const mockRefreshToken = jest.fn().mockResolvedValue(token)
+      const mockOpen = jest.fn().mockResolvedValue(user)
+      const mockGetUser = jest.fn().mockResolvedValue(user)
+      const mockEditPassword = jest.fn()
+
+      jest.spyOn(UserAggregator, 'refreshToken').mockImplementation(mockRefreshToken)
+      jest.spyOn(TokenService, 'open').mockImplementation(mockOpen)
+      jest.spyOn(AccountServiceClient, 'getUser').mockImplementation(mockGetUser)
+      jest.spyOn(UserAggregator, 'editPassword').mockImplementation(mockEditPassword)
+
+      const response = await request(App).patch('/v1/users/password').send({
+        password: user.password,
+        confirmPassword
+      }).set('X-Cig-Token', token)
+
+      expect(response.statusCode).toBe(400)
+      expect(mockEditPassword).not.toHaveBeenCalledWith(user.id, user.password, user.confirmPassword)
+      expect(response.body).toMatchObject({
+        ok: false,
+      })
+    })
+  })
 })

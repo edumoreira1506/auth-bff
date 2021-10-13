@@ -56,6 +56,10 @@ export class UserAggregator {
 
     return { user: userData, breeder: breederData, breederUser: breederUserData }
   }
+
+  async editPassword(userId: string, password: string, confirmPassword: string) {
+    return await this._accountServiceClient.editUser({ password, confirmPassword }, userId)
+  }
 }
 
 export default new UserAggregator(AccountClient, BreederClient)
