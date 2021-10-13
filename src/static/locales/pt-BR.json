@@ -13,5 +13,8 @@
 	"common.updated": "Atualizado com sucesso!",
 	"messages.recover-password.success": "E-mail enviado com sucesso",
 	"emails.recover-password.title": "Recuperação de senha",
-	"emails.recover-password.content": "Sua senha é: {{password}}"
+	"emails.recover-password.content": "Sua senha é: {{password}}",
+	"messages.edit-password.success": "messages.edit-password.success",
+	"user.fields.confirm-password": "user.fields.confirm-password",
+	"must-be-equal": "must-be-equal"
 }

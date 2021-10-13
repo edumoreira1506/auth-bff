@@ -1,5 +1,10 @@
 import { createDoc } from '@cig-platform/docs'
-import { authUserSchema, recoverPasswordSchema, storeUserSchema } from '@Schemas/UserSchemas'
+import {
+  authUserSchema,
+  editPasswordSchema,
+  recoverPasswordSchema,
+  storeUserSchema,
+} from '@Schemas/UserSchemas'
 
 const userDocs = {
   ...createDoc('/auth', ['Auth'], [
@@ -32,6 +37,15 @@ const userDocs = {
       title: 'Recover password',
       description: 'Route to recover user password',
       objectSchema: recoverPasswordSchema
+    }
+  ]),
+  ...createDoc('/users/password', ['Auth'], [
+    {
+      method: 'patch',
+      title: 'Edit password',
+      description: 'Route to edit password',
+      objectSchema: editPasswordSchema,
+      headerParams: [{ type: 'string', name: 'X-Cig-Token' }]
     }
   ])
 }
