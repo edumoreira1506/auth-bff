@@ -35,14 +35,16 @@ export class UserAggregator {
   async auth(email: string, password: string) {
     const user = await this._accountServiceClient.authUser(email, password)
     const breeders = await this._poultryServiceClient.getBreeders(user.id)
-    const token = await TokenService.create(user, breeders as any)
+    const merchants = await this._advertisingServiceClient.getMerchants(breeders?.[0]?.id)
+    const token = await TokenService.create(user, breeders, merchants[0])
 
     return token
   }
 
   async refreshToken(user: IUser) {
     const breeders = await this._poultryServiceClient.getBreeders(user.id)
-    const token = await TokenService.create(user as any, breeders  as any)
+    const merchants = await this._advertisingServiceClient.getMerchants(breeders?.[0]?.id)
+    const token = await TokenService.create(user, breeders, merchants[0])
 
     return token
   }
