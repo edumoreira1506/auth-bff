@@ -1,6 +1,11 @@
 import request from 'supertest'
 import faker from 'faker'
-import { userFactory, breederFactory, breederUserFactory } from '@cig-platform/factories'
+import {
+  userFactory,
+  breederFactory,
+  breederUserFactory,
+  merchantFactory
+} from '@cig-platform/factories'
 
 import App from '@Configs/server'
 import UserAggregator from '@Aggregators/UserAggregator'
@@ -88,7 +93,8 @@ describe('User actions', () => {
       const user = userFactory()
       const breeder = breederFactory({ description: 'fake description' })
       const breederUser = breederUserFactory({ userId: user.id, breederId: breeder.id })
-      const mockStore = jest.fn().mockResolvedValue({ user, breederUser, breeder })
+      const merchant = merchantFactory()
+      const mockStore = jest.fn().mockResolvedValue({ user, breederUser, breeder, merchant })
 
       jest.spyOn(UserAggregator, 'store').mockImplementation(mockStore)
 
@@ -101,6 +107,8 @@ describe('User actions', () => {
         ok: true,
         user: userWithDateString,
         breeder: breederWithDateString,
+        breederUser,
+        merchant
       })
       expect(mockStore).toHaveBeenCalledWith(userWithDateString, breederWithDateString)
     })
