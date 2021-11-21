@@ -1,7 +1,12 @@
 import { IBreeder, IUser } from '@cig-platform/types'
-import { AccountServiceClient, PoultryServiceClient } from '@cig-platform/core'
+import {
+  AccountServiceClient,
+  PoultryServiceClient,
+  AdvertisingServiceClient,
+} from '@cig-platform/core'
 
 import AccountClient from '@Clients/AccountServiceClient'
+import AdvertisingClient from '@Clients/AdvertisingServiceClient'
 import BreederClient from '@Clients/PoultryServiceClient'
 import TokenService from '@Services/TokenService'
 import InvalidEmailError from '@Errors/InvalidEmailError'
@@ -12,10 +17,16 @@ import EmailService from '@Services/EmailService'
 export class UserAggregator {
   private _accountServiceClient: AccountServiceClient;
   private _poultryServiceClient: PoultryServiceClient;
+  private _advertisingServiceClient: AdvertisingServiceClient;
 
-  constructor(accountServiceClient: AccountServiceClient, poultryServiceClient: PoultryServiceClient) {
+  constructor(
+    accountServiceClient: AccountServiceClient,
+    poultryServiceClient: PoultryServiceClient,
+    advertisingServiceClient: AdvertisingServiceClient
+  ) {
     this._accountServiceClient = accountServiceClient
     this._poultryServiceClient = poultryServiceClient
+    this._advertisingServiceClient = advertisingServiceClient
 
     this.auth = this.auth.bind(this)
     this.store = this.store.bind(this)
@@ -53,8 +64,14 @@ export class UserAggregator {
     const userData = await this._accountServiceClient.postUser(user)
     const breederData = await this._poultryServiceClient.postBreeder(breeder)
     const breederUserData = await this._poultryServiceClient.postBreederUser({ userId: userData.id, breederId: breederData.id })
+    const merchantData = await this._advertisingServiceClient.postMerchant({ externalId: breederData.id })
 
-    return { user: userData, breeder: breederData, breederUser: breederUserData }
+    return {
+      user: userData,
+      breeder: breederData,
+      breederUser: breederUserData,
+      merchant: merchantData
+    }
   }
 
   async editPassword(userId: string, password: string, confirmPassword: string) {
@@ -62,4 +79,4 @@ export class UserAggregator {
   }
 }
 
-export default new UserAggregator(AccountClient, BreederClient)
+export default new UserAggregator(AccountClient, BreederClient, AdvertisingClient)

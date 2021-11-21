@@ -21,7 +21,8 @@ describe('UserAggregator', () => {
       const mockPoultryServiceClient: any = {
         getBreeders: jest.fn().mockResolvedValue(breeders)
       }
-      const userAggregator = new UserAggregator(mockAccountServiceClient, mockPoultryServiceClient)
+      const mockAdvertisingServiceClient: any = {}
+      const userAggregator = new UserAggregator(mockAccountServiceClient, mockPoultryServiceClient, mockAdvertisingServiceClient)
       const mockCreateToken = jest.fn().mockResolvedValue(token)
 
       jest.spyOn(TokenService, 'create').mockImplementation(mockCreateToken)
@@ -44,7 +45,8 @@ describe('UserAggregator', () => {
       const mockPoultryServiceClient: any = {
         getBreeders: jest.fn().mockResolvedValue(breeders)
       }
-      const userAggregator = new UserAggregator(mockAccountServiceClient, mockPoultryServiceClient)
+      const mockAdvertisingServiceClient: any = {}
+      const userAggregator = new UserAggregator(mockAccountServiceClient, mockPoultryServiceClient, mockAdvertisingServiceClient)
 
       await expect(userAggregator.auth).rejects.toThrow(error)
     })
@@ -58,17 +60,19 @@ describe('UserAggregator', () => {
       const mockPoultryServiceClient: any = {
         getBreeders: jest.fn().mockRejectedValue(error)
       }
-      const userAggregator = new UserAggregator(mockAccountServiceClient, mockPoultryServiceClient)
+      const mockAdvertisingServiceClient: any = {}
+      const userAggregator = new UserAggregator(mockAccountServiceClient, mockPoultryServiceClient, mockAdvertisingServiceClient)
 
       await expect(userAggregator.auth).rejects.toThrow(error)
     })
   })
 
   describe('store', () => {
-    it('returns user, breeder and breederUser when the apis returns valids responses', async () => {
+    it('returns user, breeder, merchant and breederUser when the apis returns valids responses', async () => {
       const user = {}
       const breeder = {}
       const breederUser = {}
+      const merchant = {}
       const mockAccountServiceClient: any = {
         postUser: jest.fn().mockResolvedValue(user)
       }
@@ -76,15 +80,19 @@ describe('UserAggregator', () => {
         postBreeder: jest.fn().mockResolvedValue(breeder),
         postBreederUser: jest.fn().mockResolvedValue(breederUser)
       }
-      const userAggregator = new UserAggregator(mockAccountServiceClient, mockPoultryServiceClient)
+      const mockAdvertisingServiceClient: any = {
+        postMerchant: jest.fn().mockResolvedValue(merchant)
+      }
+      const userAggregator = new UserAggregator(mockAccountServiceClient, mockPoultryServiceClient, mockAdvertisingServiceClient)
 
-      expect(await userAggregator.store({}, {})).toMatchObject({ user, breederUser, breeder })
+      expect(await userAggregator.store({}, {})).toMatchObject({ user, breederUser, breeder, merchant })
     })
 
     it('throwns an error when user post request gets an error', async () => {
       const error = new Error()
       const breeder = {}
       const breederUser = {}
+      const merchant = {}
       const mockAccountServiceClient: any = {
         postUser: jest.fn().mockRejectedValue(error)
       }
@@ -92,7 +100,10 @@ describe('UserAggregator', () => {
         postBreeder: jest.fn().mockResolvedValue(breeder),
         postBreederUser: jest.fn().mockResolvedValue(breederUser)
       }
-      const userAggregator = new UserAggregator(mockAccountServiceClient, mockPoultryServiceClient)
+      const mockAdvertisingServiceClient: any = {
+        postMerchant: jest.fn().mockResolvedValue(merchant)
+      }
+      const userAggregator = new UserAggregator(mockAccountServiceClient, mockPoultryServiceClient, mockAdvertisingServiceClient)
 
       await expect(userAggregator.store).rejects.toThrow(error)
     })
@@ -101,6 +112,7 @@ describe('UserAggregator', () => {
       const error = new Error()
       const user = {}
       const breederUser = {}
+      const merchant = {}
       const mockAccountServiceClient: any = {
         postUser: jest.fn().mockResolvedValue(user)
       }
@@ -108,7 +120,10 @@ describe('UserAggregator', () => {
         postBreeder: jest.fn().mockRejectedValue(error),
         postBreederUser: jest.fn().mockResolvedValue(breederUser)
       }
-      const userAggregator = new UserAggregator(mockAccountServiceClient, mockPoultryServiceClient)
+      const mockAdvertisingServiceClient: any = {
+        postMerchant: jest.fn().mockResolvedValue(merchant)
+      }
+      const userAggregator = new UserAggregator(mockAccountServiceClient, mockPoultryServiceClient, mockAdvertisingServiceClient)
 
       await expect(userAggregator.store).rejects.toThrow(error)
     })
@@ -116,6 +131,7 @@ describe('UserAggregator', () => {
     it('throwns an error when breeder user post request gets an error', async () => {
       const breeder = {}
       const user = {}
+      const merchant = {}
       const error = new Error()
       const mockAccountServiceClient: any = {
         postUser: jest.fn().mockResolvedValue(user)
@@ -124,7 +140,30 @@ describe('UserAggregator', () => {
         postBreeder: jest.fn().mockResolvedValue(breeder),
         postBreederUser: jest.fn().mockRejectedValue(error)
       }
-      const userAggregator = new UserAggregator(mockAccountServiceClient, mockPoultryServiceClient)
+      const mockAdvertisingServiceClient: any = {
+        postMerchant: jest.fn().mockResolvedValue(merchant)
+      }
+      const userAggregator = new UserAggregator(mockAccountServiceClient, mockPoultryServiceClient, mockAdvertisingServiceClient)
+
+      await expect(userAggregator.store).rejects.toThrow(error)
+    })
+
+    it('throwns an error when merchant post request gets an error', async () => {
+      const user = {}
+      const breeder = {}
+      const breederUser = {}
+      const error = new Error()
+      const mockAccountServiceClient: any = {
+        postUser: jest.fn().mockResolvedValue(user)
+      }
+      const mockPoultryServiceClient: any = {
+        postBreeder: jest.fn().mockResolvedValue(breeder),
+        postBreederUser: jest.fn().mockResolvedValue(breederUser)
+      }
+      const mockAdvertisingServiceClient: any = {
+        postMerchant: jest.fn().mockRejectedValue(error)
+      }
+      const userAggregator = new UserAggregator(mockAccountServiceClient, mockPoultryServiceClient, mockAdvertisingServiceClient)
 
       await expect(userAggregator.store).rejects.toThrow(error)
     })
@@ -144,7 +183,8 @@ describe('UserAggregator', () => {
       const mockPoultryServiceClient: any = {
         getBreeders: jest.fn().mockReturnValue(breeders),
       }
-      const userAggregator = new UserAggregator(mockAccountServiceClient, mockPoultryServiceClient)
+      const mockAdvertisingServiceClient: any = {}
+      const userAggregator = new UserAggregator(mockAccountServiceClient, mockPoultryServiceClient, mockAdvertisingServiceClient)
 
       expect(await userAggregator.refreshToken(user)).toBe(token)
       expect(mockCreateToken).toHaveBeenLastCalledWith(user, breeders)
@@ -160,13 +200,14 @@ describe('UserAggregator', () => {
       const mockAccountServiceClient: any = {
         getUsers: jest.fn().mockResolvedValue([user])
       }
+      const mockAdvertisingServiceClient: any = {}
       const mockDecrypt = jest.fn().mockReturnValue(password)
       const mockSendEmail = jest.fn()
 
       jest.spyOn(EncryptService, 'decrypt').mockImplementation(mockDecrypt)
       jest.spyOn(EmailService, 'send').mockImplementation(mockSendEmail)
 
-      const userAggregator = new UserAggregator(mockAccountServiceClient, {} as any)
+      const userAggregator = new UserAggregator(mockAccountServiceClient, {} as any, mockAdvertisingServiceClient)
 
       await userAggregator.recoverPassword(email)
 
@@ -184,8 +225,9 @@ describe('UserAggregator', () => {
       const mockAccountServiceClient: any = {
         getUsers: jest.fn().mockResolvedValue([])
       }
+      const mockAdvertisingServiceClient: any = {}
 
-      const userAggregator = new UserAggregator(mockAccountServiceClient, {} as any)
+      const userAggregator = new UserAggregator(mockAccountServiceClient, {} as any, mockAdvertisingServiceClient)
 
       await expect(userAggregator.recoverPassword(email)).rejects.toThrow(InvalidEmailError)
     })
