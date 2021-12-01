@@ -63,16 +63,38 @@ export class UserAggregator {
   }
 
   async store(user: Partial<IUser>, breeder: Partial<IBreeder>) {
-    const userData = await this._accountServiceClient.postUser(user)
-    const breederData = await this._poultryServiceClient.postBreeder(breeder)
-    const breederUserData = await this._poultryServiceClient.postBreederUser({ userId: userData.id, breederId: breederData.id })
-    const merchantData = await this._advertisingServiceClient.postMerchant({ externalId: breederData.id })
+    let userData
+    let breederData
+    let breederUserData
+    let merchantData
 
-    return {
-      user: userData,
-      breeder: breederData,
-      breederUser: breederUserData,
-      merchant: merchantData
+    try {
+      userData = await this._accountServiceClient.postUser(user)
+      breederData = await this._poultryServiceClient.postBreeder(breeder)
+      breederUserData = await this._poultryServiceClient.postBreederUser({ userId: userData.id, breederId: breederData.id })
+      merchantData = await this._advertisingServiceClient.postMerchant({ externalId: breederData.id })
+  
+      return {
+        user: userData,
+        breeder: breederData,
+        breederUser: breederUserData,
+        merchant: merchantData
+      }
+    } catch (error) {
+      if (merchantData) {
+        this._advertisingServiceClient.rollbackMerchant(merchantData.id)
+      }
+
+      if (breederUserData && breederData) {
+        this._poultryServiceClient.rollbackBreederUser(breederData.id, breederUserData.id)
+        this._poultryServiceClient.rollbackBreeder(breederData.id)
+      }
+
+      if (userData) {
+        this._accountServiceClient.rollbackUser(userData.id)
+      }
+
+      throw error
     }
   }
 
