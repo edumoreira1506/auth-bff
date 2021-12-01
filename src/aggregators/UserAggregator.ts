@@ -87,6 +87,9 @@ export class UserAggregator {
 
       if (breederUserData && breederData) {
         this._poultryServiceClient.rollbackBreederUser(breederData.id, breederUserData.id)
+      }
+
+      if (breederData) {
         this._poultryServiceClient.rollbackBreeder(breederData.id)
       }
 
