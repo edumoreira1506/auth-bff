@@ -36,7 +36,8 @@ export class UserAggregator {
     const user = await this._accountServiceClient.authUser(email, password)
     const breeders = await this._poultryServiceClient.getBreeders(user.id)
     const merchants = await this._advertisingServiceClient.getMerchants(breeders?.[0]?.id)
-    const token = await TokenService.create(user, breeders, merchants[0])
+    const favorites = await this._advertisingServiceClient.getFavorites(user.id)
+    const token = await TokenService.create(user, breeders, merchants[0], favorites)
 
     return token
   }
@@ -44,7 +45,8 @@ export class UserAggregator {
   async refreshToken(user: IUser) {
     const breeders = await this._poultryServiceClient.getBreeders(user.id)
     const merchants = await this._advertisingServiceClient.getMerchants(breeders?.[0]?.id)
-    const token = await TokenService.create(user, breeders, merchants[0])
+    const favorites = await this._advertisingServiceClient.getFavorites(user.id)
+    const token = await TokenService.create(user, breeders, merchants[0], favorites)
 
     return token
   }
