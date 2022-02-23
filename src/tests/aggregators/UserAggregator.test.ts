@@ -1,5 +1,6 @@
 import faker from 'faker'
 import { userFactory, breederFactory, merchantFactory } from '@cig-platform/factories'
+import { IAdvertisingFavorite } from '@cig-platform/types'
 
 import { UserAggregator } from '@Aggregators/UserAggregator'
 import TokenService from '@Services/TokenService'
@@ -12,6 +13,7 @@ describe('UserAggregator', () => {
   describe('auth', () => {
     it('returns token when the account service client returns a valid user, and the breeder service returns valid breeders', async () => {
       const token = 'example token'
+      const favorites = [] as IAdvertisingFavorite[]
       const user = userFactory()
       const merchant = merchantFactory()
       const breeders = Array(10).fill(null).map(() => breederFactory())
@@ -22,7 +24,8 @@ describe('UserAggregator', () => {
         getBreeders: jest.fn().mockResolvedValue(breeders)
       }
       const mockAdvertisingServiceClient: any = {
-        getMerchants: jest.fn().mockResolvedValue([merchant])
+        getMerchants: jest.fn().mockResolvedValue([merchant]),
+        getFavorites: jest.fn().mockResolvedValue(favorites)
       }
       const userAggregator = new UserAggregator(mockAccountServiceClient, mockPoultryServiceClient, mockAdvertisingServiceClient)
       const mockCreateToken = jest.fn().mockResolvedValue(token)
@@ -33,10 +36,11 @@ describe('UserAggregator', () => {
       const password = faker.internet.password()
 
       expect(await userAggregator.auth(email, password)).toBe(token)
-      expect(mockCreateToken).toHaveBeenCalledWith(user, breeders, merchant)
+      expect(mockCreateToken).toHaveBeenCalledWith(user, breeders, merchant, favorites)
       expect(mockAccountServiceClient.authUser).toHaveBeenCalledWith(email, password)
       expect(mockPoultryServiceClient.getBreeders).toHaveBeenLastCalledWith(user.id)
       expect(mockAdvertisingServiceClient.getMerchants).toHaveBeenCalledWith(breeders[0].id)
+      expect(mockAdvertisingServiceClient.getFavorites).toHaveBeenCalledWith(user.id)
     })
 
     it('throwns an error when the account service gets an error', async () => {
@@ -49,7 +53,8 @@ describe('UserAggregator', () => {
         getBreeders: jest.fn().mockResolvedValue(breeders)
       }
       const mockAdvertisingServiceClient: any = {
-        getMerchants: jest.fn().mockResolvedValue([])
+        getMerchants: jest.fn().mockResolvedValue([]),
+        getFavorites: jest.fn().mockResolvedValue([])
       }
       const userAggregator = new UserAggregator(mockAccountServiceClient, mockPoultryServiceClient, mockAdvertisingServiceClient)
 
@@ -66,7 +71,8 @@ describe('UserAggregator', () => {
         getBreeders: jest.fn().mockRejectedValue(error)
       }
       const mockAdvertisingServiceClient: any = {
-        getMerchants: jest.fn().mockResolvedValue([])
+        getMerchants: jest.fn().mockResolvedValue([]),
+        getFavorites: jest.fn().mockResolvedValue([])
       }
       const userAggregator = new UserAggregator(mockAccountServiceClient, mockPoultryServiceClient, mockAdvertisingServiceClient)
 
@@ -84,7 +90,8 @@ describe('UserAggregator', () => {
         getBreeders: jest.fn().mockResolvedValue(breeders)
       }
       const mockAdvertisingServiceClient: any = {
-        getMerchants: jest.fn().mockRejectedValue(error)
+        getMerchants: jest.fn().mockRejectedValue(error),
+        getFavorites: jest.fn().mockResolvedValue([])
       }
       const userAggregator = new UserAggregator(mockAccountServiceClient, mockPoultryServiceClient, mockAdvertisingServiceClient)
 
@@ -214,6 +221,7 @@ describe('UserAggregator', () => {
       const user = userFactory()
       const breeder = breederFactory()
       const merchant = merchantFactory()
+      const favorites = [] as IAdvertisingFavorite[]
       const token = 'token'
       const breeders = [breeder]
 
@@ -226,14 +234,16 @@ describe('UserAggregator', () => {
         getBreeders: jest.fn().mockReturnValue(breeders),
       }
       const mockAdvertisingServiceClient: any = {
-        getMerchants: jest.fn().mockResolvedValue([merchant])
+        getMerchants: jest.fn().mockResolvedValue([merchant]),
+        getFavorites: jest.fn().mockResolvedValue(favorites)
       }
       const userAggregator = new UserAggregator(mockAccountServiceClient, mockPoultryServiceClient, mockAdvertisingServiceClient)
 
       expect(await userAggregator.refreshToken(user)).toBe(token)
-      expect(mockCreateToken).toHaveBeenLastCalledWith(user, breeders, merchant)
+      expect(mockCreateToken).toHaveBeenLastCalledWith(user, breeders, merchant, favorites)
       expect(mockPoultryServiceClient.getBreeders).toHaveBeenCalledWith(user.id)
       expect(mockAdvertisingServiceClient.getMerchants).toHaveBeenCalledWith(breeder.id)
+      expect(mockAdvertisingServiceClient.getFavorites).toHaveBeenCalledWith(user.id)
     })
   })
 
