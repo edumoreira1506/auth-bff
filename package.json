@@ -20,7 +20,7 @@
 		"@cig-platform/docs": "^0.4.6",
 		"@cig-platform/encrypt": "0.0.1",
 		"@cig-platform/factories": "0.0.10",
-		"@cig-platform/types": "0.0.9",
+		"@cig-platform/types": "0.0.28",
 		"cors": "^2.8.5",
 		"dotenv": "^10.0.0",
 		"express": "^4.17.1",
