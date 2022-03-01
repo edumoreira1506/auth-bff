@@ -13,6 +13,7 @@ import InvalidEmailError from '@Errors/InvalidEmailError'
 import EncryptService from '@Services/EncryptService'
 import i18n from '@Configs/i18n'
 import EmailService from '@Services/EmailService'
+import { UserRegisterTypeEnum } from '@cig-platform/enums'
 
 export class UserAggregator {
   private _accountServiceClient: AccountServiceClient;
@@ -64,14 +65,14 @@ export class UserAggregator {
     EmailService.send({ emailDestination: userOfEmail.email, subject: emailSubject, message: emailText })
   }
 
-  async store(user: Partial<IUser>, breeder: Partial<IBreeder>) {
+  async store(user: Partial<IUser>, breeder: Partial<IBreeder>, type = UserRegisterTypeEnum.Default) {
     let userData
     let breederData
     let breederUserData
     let merchantData
 
     try {
-      userData = await this._accountServiceClient.postUser(user)
+      userData = await this._accountServiceClient.postUser({ ...user, registerType: type })
       breederData = await this._poultryServiceClient.postBreeder(breeder)
       breederUserData = await this._poultryServiceClient.postBreederUser({ userId: userData.id, breederId: breederData.id })
       merchantData = await this._advertisingServiceClient.postMerchant({ externalId: breederData.id })

@@ -30,7 +30,8 @@ export const editPasswordSchema = Joi.object({
 
 export const storeUserSchema = Joi.object({
   breeder: Joi.object().required(),
-  user: Joi.object().required()
+  user: Joi.object().required(),
+  type: Joi.string(),
 })
 
 export const recoverPasswordSchema = Joi.object({
