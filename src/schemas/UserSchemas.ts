@@ -2,7 +2,7 @@ import Joi from 'joi'
 
 import i18n from '@Configs/i18n'
 
-const passwordSchema = Joi.string().required().messages({
+const passwordSchema = Joi.string().messages({
   'string.empty': i18n.__('empty-field', { field: i18n.__('user.fields.password') }),
   'any.required': i18n.__('required-field', { field: i18n.__('user.fields.password') })
 })
@@ -14,10 +14,12 @@ export const authUserSchema = Joi.object({
     'any.required': i18n.__('required-field', { field: i18n.__('user.fields.email') })
   }),
   password: passwordSchema,
+  type: Joi.string(),
+  externalId: Joi.string()
 }).options({ abortEarly: false })
 
 export const editPasswordSchema = Joi.object({
-  password: passwordSchema,
+  password: passwordSchema.required(),
   confirmPassword: Joi.string().equal(Joi.ref('password')).required().messages({
     'any.only': i18n.__('must-be-equal', {
       field1: i18n.__('user.fields.password'),
@@ -30,7 +32,9 @@ export const editPasswordSchema = Joi.object({
 
 export const storeUserSchema = Joi.object({
   breeder: Joi.object().required(),
-  user: Joi.object().required()
+  user: Joi.object().required(),
+  type: Joi.string(),
+  externalId: Joi.string()
 })
 
 export const recoverPasswordSchema = Joi.object({

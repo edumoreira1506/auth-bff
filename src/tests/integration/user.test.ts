@@ -27,7 +27,7 @@ describe('User actions', () => {
 
       expect(response.statusCode).toBe(200)
       expect(response.body.token).toBe(token)
-      expect(mockAuth).toHaveBeenCalledWith(email, password)
+      expect(mockAuth).toHaveBeenCalledWith(email, password, undefined, undefined)
     })
 
     it('is an invalid authentication when is not sent email', async () => {
@@ -45,26 +45,6 @@ describe('User actions', () => {
         ok: false,
         error: {
           message: i18n.__('required-field', { field: i18n.__('user.fields.email') }),
-          name: 'ValidationError',
-        }
-      })
-    })
-
-    it('is an invalid authentication when is not sent password', async () => {
-      const token = 'example token'
-      const email = faker.internet.email()
-      const password = undefined
-      const mockAuth = jest.fn().mockResolvedValue(token)
-
-      jest.spyOn(UserAggregator, 'auth').mockImplementation(mockAuth)
-
-      const response = await request(App).post('/v1/auth').send({ email, password })
-
-      expect(response.statusCode).toBe(400)
-      expect(response.body).toMatchObject({
-        ok: false,
-        error: {
-          message: i18n.__('required-field', { field: i18n.__('user.fields.password') }),
           name: 'ValidationError',
         }
       })
@@ -98,7 +78,7 @@ describe('User actions', () => {
 
       jest.spyOn(UserAggregator, 'store').mockImplementation(mockStore)
 
-      const response = await request(App).post('/v1/users').send({ user, breeder })
+      const response = await request(App).post('/v1/users').send({ user, breeder, type: user.registerType })
       const userWithDateString = { ...user, birthDate: user?.birthDate?.toISOString() }
       const breederWithDateString = { ...breeder, foundationDate: breeder.foundationDate.toISOString() }
 
@@ -110,7 +90,7 @@ describe('User actions', () => {
         breederUser,
         merchant
       })
-      expect(mockStore).toHaveBeenCalledWith(userWithDateString, breederWithDateString)
+      expect(mockStore).toHaveBeenCalledWith(userWithDateString, breederWithDateString, user.registerType, undefined)
     })
 
     it('is na invalid register when does not send user', async () => {
@@ -145,7 +125,7 @@ describe('User actions', () => {
 
       jest.spyOn(UserAggregator, 'store').mockImplementation(mockStore)
 
-      const response = await request(App).post('/v1/users').send({ user, breeder })
+      const response = await request(App).post('/v1/users').send({ user, breeder, type: user.registerType })
 
       expect(response.statusCode).toBe(400)
       expect(response.body).toMatchObject({
@@ -154,7 +134,9 @@ describe('User actions', () => {
       })
       expect(mockStore).toHaveBeenCalledWith(
         { ...user, birthDate: user?.birthDate?.toISOString() },
-        { ...breeder, foundationDate: breeder?.foundationDate?.toISOString() }
+        { ...breeder, foundationDate: breeder?.foundationDate?.toISOString() },
+        user.registerType,
+        undefined
       )
     })
   })

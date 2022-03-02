@@ -13,6 +13,7 @@ import InvalidEmailError from '@Errors/InvalidEmailError'
 import EncryptService from '@Services/EncryptService'
 import i18n from '@Configs/i18n'
 import EmailService from '@Services/EmailService'
+import { UserRegisterTypeEnum } from '@cig-platform/enums'
 
 export class UserAggregator {
   private _accountServiceClient: AccountServiceClient;
@@ -32,8 +33,8 @@ export class UserAggregator {
     this.store = this.store.bind(this)
   }
 
-  async auth(email: string, password: string) {
-    const user = await this._accountServiceClient.authUser(email, password)
+  async auth(email: string, password: string, type: string = UserRegisterTypeEnum.Default, externalId?: string) {
+    const user = await this._accountServiceClient.authUser(email, password, type, externalId)
     const breeders = await this._poultryServiceClient.getBreeders(user.id)
     const merchants = await this._advertisingServiceClient.getMerchants(breeders?.[0]?.id)
     const favorites = await this._advertisingServiceClient.getFavorites(user.id)
@@ -64,14 +65,19 @@ export class UserAggregator {
     EmailService.send({ emailDestination: userOfEmail.email, subject: emailSubject, message: emailText })
   }
 
-  async store(user: Partial<IUser>, breeder: Partial<IBreeder>) {
+  async store(
+    user: Partial<IUser>,
+    breeder: Partial<IBreeder>,
+    type = UserRegisterTypeEnum.Default,
+    externalId?: string
+  ) {
     let userData
     let breederData
     let breederUserData
     let merchantData
 
     try {
-      userData = await this._accountServiceClient.postUser(user)
+      userData = await this._accountServiceClient.postUser({ ...user, registerType: type, externalId })
       breederData = await this._poultryServiceClient.postBreeder(breeder)
       breederUserData = await this._poultryServiceClient.postBreederUser({ userId: userData.id, breederId: breederData.id })
       merchantData = await this._advertisingServiceClient.postMerchant({ externalId: breederData.id })
