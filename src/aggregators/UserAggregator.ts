@@ -33,7 +33,7 @@ export class UserAggregator {
     this.store = this.store.bind(this)
   }
 
-  async auth(email: string, password: string, type: UserRegisterTypeEnum.Default, externalId?: string) {
+  async auth(email: string, password: string, type: string = UserRegisterTypeEnum.Default, externalId?: string) {
     const user = await this._accountServiceClient.authUser(email, password, type, externalId)
     const breeders = await this._poultryServiceClient.getBreeders(user.id)
     const merchants = await this._advertisingServiceClient.getMerchants(breeders?.[0]?.id)

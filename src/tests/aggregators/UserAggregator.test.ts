@@ -37,7 +37,7 @@ describe('UserAggregator', () => {
 
       expect(await userAggregator.auth(email, password)).toBe(token)
       expect(mockCreateToken).toHaveBeenCalledWith(user, breeders, merchant, favorites)
-      expect(mockAccountServiceClient.authUser).toHaveBeenCalledWith(email, password)
+      expect(mockAccountServiceClient.authUser).toHaveBeenCalledWith(email, password, user.registerType, undefined)
       expect(mockPoultryServiceClient.getBreeders).toHaveBeenLastCalledWith(user.id)
       expect(mockAdvertisingServiceClient.getMerchants).toHaveBeenCalledWith(breeders[0].id)
       expect(mockAdvertisingServiceClient.getFavorites).toHaveBeenCalledWith(user.id)
