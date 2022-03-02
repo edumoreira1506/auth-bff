@@ -16,8 +16,10 @@ class UserController {
   async auth(req: Request, res: Response): Promise<Response> {
     const email = req.body.email
     const password = req.body.password
+    const type = req.body.type
+    const externalId = req.body.externalId
 
-    const token = await UserAggregator.auth(email, password)
+    const token = await UserAggregator.auth(email, password, type, externalId)
 
     return BaseController.successResponse(res, { token })
   }
@@ -33,9 +35,9 @@ class UserController {
 
   @BaseController.errorHandler()
   async store(req: Request, res: Response): Promise<Response> {
-    const { breeder, user, type } = req.body
+    const { breeder, user, type, externalId } = req.body
 
-    const entities = await UserAggregator.store(user, breeder, type)
+    const entities = await UserAggregator.store(user, breeder, type, externalId)
 
     return BaseController.successResponse(res, entities)
   }
