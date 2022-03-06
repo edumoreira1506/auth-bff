@@ -1,4 +1,4 @@
-import faker from 'faker'
+import faker from '@faker-js/faker'
 import { userFactory, breederFactory, merchantFactory } from '@cig-platform/factories'
 import { IAdvertisingFavorite } from '@cig-platform/types'
 
@@ -11,7 +11,7 @@ import InvalidEmailError from '@Errors/InvalidEmailError'
 
 describe('UserAggregator', () => {
   describe('auth', () => {
-    it('returns token when the account service client returns a valid user, and the breeder service returns valid breeders', async () => {
+    it('returns token when the account service client returns a valid user, and the poultry service returns valid breeders', async () => {
       const token = 'example token'
       const favorites = [] as IAdvertisingFavorite[]
       const user = userFactory()
@@ -61,7 +61,7 @@ describe('UserAggregator', () => {
       await expect(userAggregator.auth).rejects.toThrow(error)
     })
 
-    it('throwns an error when the breeder service gets an error', async () => {
+    it('throwns an error when the poultry service gets an error', async () => {
       const error = new Error()
       const user = userFactory()
       const mockAccountServiceClient: any = {
@@ -96,6 +96,78 @@ describe('UserAggregator', () => {
       const userAggregator = new UserAggregator(mockAccountServiceClient, mockPoultryServiceClient, mockAdvertisingServiceClient)
 
       await expect(userAggregator.auth).rejects.toThrow(error)
+    })
+  })
+
+  describe('refreshToken', () => {
+    it('returns the token', async () => {
+      const user = userFactory()
+      const breeder = breederFactory()
+      const merchant = merchantFactory()
+      const favorites = [] as IAdvertisingFavorite[]
+      const token = 'token'
+      const breeders = [breeder]
+
+      const mockCreateToken = jest.fn().mockResolvedValue(token)
+
+      jest.spyOn(TokenService, 'create').mockImplementation(mockCreateToken)
+
+      const mockAccountServiceClient: any = {}
+      const mockPoultryServiceClient: any = {
+        getBreeders: jest.fn().mockReturnValue(breeders),
+      }
+      const mockAdvertisingServiceClient: any = {
+        getMerchants: jest.fn().mockResolvedValue([merchant]),
+        getFavorites: jest.fn().mockResolvedValue(favorites)
+      }
+      const userAggregator = new UserAggregator(mockAccountServiceClient, mockPoultryServiceClient, mockAdvertisingServiceClient)
+
+      expect(await userAggregator.refreshToken(user)).toBe(token)
+      expect(mockCreateToken).toHaveBeenLastCalledWith(user, breeders, merchant, favorites)
+      expect(mockPoultryServiceClient.getBreeders).toHaveBeenCalledWith(user.id)
+      expect(mockAdvertisingServiceClient.getMerchants).toHaveBeenCalledWith(breeder.id)
+      expect(mockAdvertisingServiceClient.getFavorites).toHaveBeenCalledWith(user.id)
+    })
+  })
+
+  describe('recoverPassword', () => {
+    it('send and email when the api returns a valid user', async () => {
+      const email = faker.internet.email()
+      const password = faker.internet.password()
+      const user = userFactory({ email, password })
+      const mockAccountServiceClient: any = {
+        getUsers: jest.fn().mockResolvedValue([user])
+      }
+      const mockAdvertisingServiceClient: any = {}
+      const mockDecrypt = jest.fn().mockReturnValue(password)
+      const mockSendEmail = jest.fn()
+
+      jest.spyOn(EncryptService, 'decrypt').mockImplementation(mockDecrypt)
+      jest.spyOn(EmailService, 'send').mockImplementation(mockSendEmail)
+
+      const userAggregator = new UserAggregator(mockAccountServiceClient, {} as any, mockAdvertisingServiceClient)
+
+      await userAggregator.recoverPassword(email)
+
+      expect(mockDecrypt).toHaveBeenCalledWith(user.password)
+      expect(mockAccountServiceClient.getUsers).toHaveBeenCalledWith({ email })
+      expect(mockSendEmail).toHaveBeenCalledWith({
+        emailDestination: user.email,
+        subject: i18n.__('emails.recover-password.title'),
+        message: i18n.__('emails.recover-password.content', { password })
+      })
+    })
+
+    it('throws an error when the api does not return users', async () => {
+      const email = faker.internet.email()
+      const mockAccountServiceClient: any = {
+        getUsers: jest.fn().mockResolvedValue([])
+      }
+      const mockAdvertisingServiceClient: any = {}
+
+      const userAggregator = new UserAggregator(mockAccountServiceClient, {} as any, mockAdvertisingServiceClient)
+
+      await expect(userAggregator.recoverPassword(email)).rejects.toThrow(InvalidEmailError)
     })
   })
 
@@ -213,78 +285,6 @@ describe('UserAggregator', () => {
       expect(mockAccountServiceClient.rollbackUser).toHaveBeenCalledTimes(1)
       expect(mockPoultryServiceClient.rollbackBreeder).toHaveBeenCalledTimes(1)
       expect(mockPoultryServiceClient.rollbackBreederUser).toHaveBeenCalledTimes(1)
-    })
-  })
-
-  describe('refreshToken', () => {
-    it('returns the token', async () => {
-      const user = userFactory()
-      const breeder = breederFactory()
-      const merchant = merchantFactory()
-      const favorites = [] as IAdvertisingFavorite[]
-      const token = 'token'
-      const breeders = [breeder]
-
-      const mockCreateToken = jest.fn().mockResolvedValue(token)
-
-      jest.spyOn(TokenService, 'create').mockImplementation(mockCreateToken)
-
-      const mockAccountServiceClient: any = {}
-      const mockPoultryServiceClient: any = {
-        getBreeders: jest.fn().mockReturnValue(breeders),
-      }
-      const mockAdvertisingServiceClient: any = {
-        getMerchants: jest.fn().mockResolvedValue([merchant]),
-        getFavorites: jest.fn().mockResolvedValue(favorites)
-      }
-      const userAggregator = new UserAggregator(mockAccountServiceClient, mockPoultryServiceClient, mockAdvertisingServiceClient)
-
-      expect(await userAggregator.refreshToken(user)).toBe(token)
-      expect(mockCreateToken).toHaveBeenLastCalledWith(user, breeders, merchant, favorites)
-      expect(mockPoultryServiceClient.getBreeders).toHaveBeenCalledWith(user.id)
-      expect(mockAdvertisingServiceClient.getMerchants).toHaveBeenCalledWith(breeder.id)
-      expect(mockAdvertisingServiceClient.getFavorites).toHaveBeenCalledWith(user.id)
-    })
-  })
-
-  describe('recoverPassword', () => {
-    it('send and email when the api returns a valid user', async () => {
-      const email = faker.internet.email()
-      const password = faker.internet.password()
-      const user = userFactory({ email, password })
-      const mockAccountServiceClient: any = {
-        getUsers: jest.fn().mockResolvedValue([user])
-      }
-      const mockAdvertisingServiceClient: any = {}
-      const mockDecrypt = jest.fn().mockReturnValue(password)
-      const mockSendEmail = jest.fn()
-
-      jest.spyOn(EncryptService, 'decrypt').mockImplementation(mockDecrypt)
-      jest.spyOn(EmailService, 'send').mockImplementation(mockSendEmail)
-
-      const userAggregator = new UserAggregator(mockAccountServiceClient, {} as any, mockAdvertisingServiceClient)
-
-      await userAggregator.recoverPassword(email)
-
-      expect(mockDecrypt).toHaveBeenCalledWith(user.password)
-      expect(mockAccountServiceClient.getUsers).toHaveBeenCalledWith({ email })
-      expect(mockSendEmail).toHaveBeenCalledWith({
-        emailDestination: user.email,
-        subject: i18n.__('emails.recover-password.title'),
-        message: i18n.__('emails.recover-password.content', { password })
-      })
-    })
-
-    it('throws an error when the api does not return users', async () => {
-      const email = faker.internet.email()
-      const mockAccountServiceClient: any = {
-        getUsers: jest.fn().mockResolvedValue([])
-      }
-      const mockAdvertisingServiceClient: any = {}
-
-      const userAggregator = new UserAggregator(mockAccountServiceClient, {} as any, mockAdvertisingServiceClient)
-
-      await expect(userAggregator.recoverPassword(email)).rejects.toThrow(InvalidEmailError)
     })
   })
 })

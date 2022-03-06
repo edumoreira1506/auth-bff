@@ -16,9 +16,9 @@ import EmailService from '@Services/EmailService'
 import { UserRegisterTypeEnum } from '@cig-platform/enums'
 
 export class UserAggregator {
-  private _accountServiceClient: AccountServiceClient;
-  private _poultryServiceClient: PoultryServiceClient;
-  private _advertisingServiceClient: AdvertisingServiceClient;
+  private _accountServiceClient: AccountServiceClient
+  private _poultryServiceClient: PoultryServiceClient
+  private _advertisingServiceClient: AdvertisingServiceClient
 
   constructor(
     accountServiceClient: AccountServiceClient,

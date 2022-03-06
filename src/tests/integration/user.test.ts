@@ -1,5 +1,5 @@
 import request from 'supertest'
-import faker from 'faker'
+import faker from '@faker-js/faker'
 import {
   userFactory,
   breederFactory,
@@ -79,8 +79,15 @@ describe('User actions', () => {
       jest.spyOn(UserAggregator, 'store').mockImplementation(mockStore)
 
       const response = await request(App).post('/v1/users').send({ user, breeder, type: user.registerType })
-      const userWithDateString = { ...user, birthDate: user?.birthDate?.toISOString() }
-      const breederWithDateString = { ...breeder, foundationDate: breeder.foundationDate.toISOString() }
+      const userWithDateString = {
+        ...user,
+        birthDate: user?.birthDate?.toISOString(),
+      }
+      const breederWithDateString = {
+        ...breeder,
+        foundationDate: breeder.foundationDate.toISOString(),
+        createdAt: breeder?.createdAt?.toISOString(),
+      }
 
       expect(response.statusCode).toBe(200)
       expect(response.body).toMatchObject({
@@ -133,8 +140,15 @@ describe('User actions', () => {
         error
       })
       expect(mockStore).toHaveBeenCalledWith(
-        { ...user, birthDate: user?.birthDate?.toISOString() },
-        { ...breeder, foundationDate: breeder?.foundationDate?.toISOString() },
+        {
+          ...user,
+          birthDate: user?.birthDate?.toISOString()
+        },
+        {
+          ...breeder, 
+          foundationDate: breeder?.foundationDate?.toISOString(),
+          createdAt: breeder?.createdAt?.toISOString(),
+        },
         user.registerType,
         undefined
       )
