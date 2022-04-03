@@ -16,12 +16,14 @@ class TokenService {
   async create({
     email,
     id,
-    name
+    name,
+    registerType
   }: IUser, breeders: IBreeder[], merchant: IMerchant, favorites: IAdvertisingFavorite[]) {
     return jwt.sign({
       email,
       id,
       name,
+      registerType,
       breeders,
       merchant,
       favorites
