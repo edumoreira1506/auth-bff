@@ -1,5 +1,46 @@
-import { TokenService } from '@cig-platform/core'
+import { IAdvertisingFavorite, IBreeder, IMerchant, IUser } from '@cig-platform/types'
+import jwt from 'jsonwebtoken'
 
 import { JWT_ENCRYPT_SECRET } from '@Constants/jwt'
+
+class TokenService {
+  private _encryptSecret: string
+
+  constructor(encryptSecret: string) {
+    this._encryptSecret = encryptSecret
+
+    this.create = this.create.bind(this)
+    this.open = this.open.bind(this)
+  }
+
+  async create({
+    email,
+    id,
+    name,
+    registerType
+  }: IUser, breeders: IBreeder[], merchant: IMerchant, favorites: IAdvertisingFavorite[]) {
+    return jwt.sign({
+      email,
+      id,
+      name,
+      registerType,
+      breeders,
+      merchant,
+      favorites
+    }, this._encryptSecret, {
+      expiresIn: '1d'
+    })
+  }
+
+  open(token: string): Promise<any> {
+    return new Promise((resolve, reject) => {
+      jwt.verify(token, this._encryptSecret, (error: any, decoded: any) => {
+        if (error) reject(error)
+
+        return resolve(decoded)
+      })
+    })
+  }
+}
 
 export default new TokenService(JWT_ENCRYPT_SECRET)
