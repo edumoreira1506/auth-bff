@@ -30,7 +30,7 @@ class TokenService {
     })
   }
 
-  open(token: string) {
+  open(token: string): Promise<any> {
     return new Promise((resolve, reject) => {
       jwt.verify(token, this._encryptSecret, (error: any, decoded: any) => {
         if (error) reject(error)
