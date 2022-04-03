@@ -1,6 +1,7 @@
 import faker from '@faker-js/faker'
 import { userFactory, breederFactory, merchantFactory } from '@cig-platform/factories'
 import { IAdvertisingFavorite } from '@cig-platform/types'
+import { UserRegisterTypeEnum } from '@cig-platform/enums'
 
 import { UserAggregator } from '@Aggregators/UserAggregator'
 import TokenService from '@Services/TokenService'
@@ -8,6 +9,7 @@ import EncryptService from '@Services/EncryptService'
 import EmailService from '@Services/EmailService'
 import i18n from '@Configs/i18n'
 import InvalidEmailError from '@Errors/InvalidEmailError'
+import InvalidRegisterTypeError from '@Errors/InvalidRegisterTypeError'
 
 describe('UserAggregator', () => {
   describe('auth', () => {
@@ -168,6 +170,29 @@ describe('UserAggregator', () => {
       const userAggregator = new UserAggregator(mockAccountServiceClient, {} as any, mockAdvertisingServiceClient)
 
       await expect(userAggregator.recoverPassword(email)).rejects.toThrow(InvalidEmailError)
+    })
+
+    it('throws an error when the user is not the default register type', async () => {
+      const email = faker.internet.email()
+      const password = faker.internet.password()
+      const user = userFactory({ email, password, registerType: UserRegisterTypeEnum.Facebook })
+      const mockAccountServiceClient: any = {
+        getUsers: jest.fn().mockResolvedValue([user])
+      }
+      const mockAdvertisingServiceClient: any = {}
+      const mockDecrypt = jest.fn().mockReturnValue(password)
+      const mockSendEmail = jest.fn()
+
+      jest.spyOn(EncryptService, 'decrypt').mockImplementation(mockDecrypt)
+      jest.spyOn(EmailService, 'send').mockImplementation(mockSendEmail)
+
+      const userAggregator = new UserAggregator(mockAccountServiceClient, {} as any, mockAdvertisingServiceClient)
+
+      await expect(userAggregator.recoverPassword(email)).rejects.toThrow(InvalidRegisterTypeError)
+
+      expect(mockDecrypt).not.toHaveBeenCalledWith()
+      expect(mockAccountServiceClient.getUsers).toHaveBeenCalledWith({ email })
+      expect(mockSendEmail).not.toHaveBeenCalled()
     })
   })
 
