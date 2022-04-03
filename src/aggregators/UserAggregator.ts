@@ -10,6 +10,7 @@ import AdvertisingClient from '@Clients/AdvertisingServiceClient'
 import BreederClient from '@Clients/PoultryServiceClient'
 import TokenService from '@Services/TokenService'
 import InvalidEmailError from '@Errors/InvalidEmailError'
+import InvalidRegisterTypeError from '@Errors/InvalidRegisterTypeError'
 import EncryptService from '@Services/EncryptService'
 import i18n from '@Configs/i18n'
 import EmailService from '@Services/EmailService'
@@ -57,6 +58,7 @@ export class UserAggregator {
     const userOfEmail = users?.[0]
 
     if (!userOfEmail) throw new InvalidEmailError()
+    if (userOfEmail.registerType !== UserRegisterTypeEnum.Default) throw new InvalidRegisterTypeError()
 
     const decryptedPassword = EncryptService.decrypt(userOfEmail.password)
     const emailSubject = i18n.__('emails.recover-password.title')

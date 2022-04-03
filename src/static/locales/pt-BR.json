@@ -10,6 +10,7 @@
 	"user.fields.password": "Senha",
 	"auth.errors.invalid-login": "Falha de autenticação",
 	"common.errors.invalid-email": "E-mail não encontrado",
+	"recover-password.errors.invalid-register-type": "Recuperação de senha só pode ser realizado para usuários que não foram cadastrados via rede social",
 	"common.updated": "Atualizado com sucesso!",
 	"messages.recover-password.success": "E-mail enviado com sucesso",
 	"emails.recover-password.title": "Recuperação de senha",
