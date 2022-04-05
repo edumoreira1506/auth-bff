@@ -4,6 +4,7 @@ import {
   PoultryServiceClient,
   AdvertisingServiceClient,
 } from '@cig-platform/core'
+import { BreederContactTypeEnum, UserRegisterTypeEnum } from '@cig-platform/enums'
 
 import AccountClient from '@Clients/AccountServiceClient'
 import AdvertisingClient from '@Clients/AdvertisingServiceClient'
@@ -14,7 +15,6 @@ import InvalidRegisterTypeError from '@Errors/InvalidRegisterTypeError'
 import EncryptService from '@Services/EncryptService'
 import i18n from '@Configs/i18n'
 import EmailService from '@Services/EmailService'
-import { UserRegisterTypeEnum } from '@cig-platform/enums'
 
 export class UserAggregator {
   private _accountServiceClient: AccountServiceClient
@@ -67,20 +67,32 @@ export class UserAggregator {
     EmailService.send({ emailDestination: userOfEmail.email, subject: emailSubject, message: emailText })
   }
 
-  async store(
-    user: Partial<IUser>,
-    breeder: Partial<IBreeder>,
+  async store({
+    user,
+    breeder,
     type = UserRegisterTypeEnum.Default,
-    externalId?: string
-  ) {
+    externalId,
+    whatsApp
+  }: {
+    user: Partial<IUser>;
+    breeder: Partial<IBreeder>;
+    type: string;
+    externalId?: string;
+    whatsApp?: string;
+  }) {
     let userData
     let breederData
+    let breederContactData
     let breederUserData
     let merchantData
 
     try {
       userData = await this._accountServiceClient.postUser({ ...user, registerType: type, externalId })
       breederData = await this._poultryServiceClient.postBreeder(breeder)
+      breederContactData = await this._poultryServiceClient.postBreederContact(breederData.id, {
+        value: whatsApp,
+        type: BreederContactTypeEnum.WHATS_APP
+      })
       breederUserData = await this._poultryServiceClient.postBreederUser({ userId: userData.id, breederId: breederData.id })
       merchantData = await this._advertisingServiceClient.postMerchant({ externalId: breederData.id })
   
@@ -88,7 +100,8 @@ export class UserAggregator {
         user: userData,
         breeder: breederData,
         breederUser: breederUserData,
-        merchant: merchantData
+        merchant: merchantData,
+        contact: breederContactData
       }
     } catch (error) {
       if (merchantData) {
@@ -97,6 +110,10 @@ export class UserAggregator {
 
       if (breederUserData && breederData) {
         this._poultryServiceClient.rollbackBreederUser(breederData.id, breederUserData.id)
+      }
+
+      if (breederContactData && breederData) {
+        this._poultryServiceClient.rollbackBreederContact(breederData.id, breederContactData.id)
       }
 
       if (breederData) {

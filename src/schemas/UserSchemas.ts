@@ -34,7 +34,8 @@ export const storeUserSchema = Joi.object({
   breeder: Joi.object().required(),
   user: Joi.object().required(),
   type: Joi.string(),
-  externalId: Joi.string()
+  externalId: Joi.string(),
+  whatsApp: Joi.string().required()
 })
 
 export const recoverPasswordSchema = Joi.object({
