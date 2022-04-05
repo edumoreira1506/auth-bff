@@ -76,7 +76,7 @@ export class UserAggregator {
   }: {
     user: Partial<IUser>;
     breeder: Partial<IBreeder>;
-    type: string;
+    type?: string;
     externalId?: string;
     whatsApp?: string;
   }) {

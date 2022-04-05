@@ -202,19 +202,24 @@ describe('UserAggregator', () => {
       const breeder = {}
       const breederUser = {}
       const merchant = {}
+      const breederContact = {}
       const mockAccountServiceClient: any = {
         postUser: jest.fn().mockResolvedValue(user)
       }
       const mockPoultryServiceClient: any = {
         postBreeder: jest.fn().mockResolvedValue(breeder),
-        postBreederUser: jest.fn().mockResolvedValue(breederUser)
+        postBreederUser: jest.fn().mockResolvedValue(breederUser),
+        postBreederContact: jest.fn().mockResolvedValue(breederContact)
       }
       const mockAdvertisingServiceClient: any = {
         postMerchant: jest.fn().mockResolvedValue(merchant)
       }
       const userAggregator = new UserAggregator(mockAccountServiceClient, mockPoultryServiceClient, mockAdvertisingServiceClient)
 
-      expect(await userAggregator.store({}, {})).toMatchObject({ user, breederUser, breeder, merchant })
+      expect(await userAggregator.store({
+        breeder: {},
+        user: {}
+      })).toMatchObject({ user, breederUser, breeder, merchant })
     })
 
     it('throwns an error when user post request gets an error', async () => {
@@ -222,11 +227,13 @@ describe('UserAggregator', () => {
       const breeder = {}
       const breederUser = {}
       const merchant = {}
+      const breederContact = {}
       const mockAccountServiceClient: any = {
         postUser: jest.fn().mockRejectedValue(error)
       }
       const mockPoultryServiceClient: any = {
         postBreeder: jest.fn().mockResolvedValue(breeder),
+        postBreederContact: jest.fn().mockResolvedValue(breederContact),
         postBreederUser: jest.fn().mockResolvedValue(breederUser)
       }
       const mockAdvertisingServiceClient: any = {
@@ -234,13 +241,14 @@ describe('UserAggregator', () => {
       }
       const userAggregator = new UserAggregator(mockAccountServiceClient, mockPoultryServiceClient, mockAdvertisingServiceClient)
 
-      await expect(userAggregator.store).rejects.toThrow(error)
+      await expect(userAggregator.store({ user: {}, breeder })).rejects.toThrow(error)
     })
 
     it('throwns an error when breeder post request gets an error', async () => {
       const error = new Error()
       const user = {}
       const breederUser = {}
+      const breederContact = {}
       const merchant = {}
       const mockAccountServiceClient: any = {
         postUser: jest.fn().mockResolvedValue(user),
@@ -248,6 +256,7 @@ describe('UserAggregator', () => {
       }
       const mockPoultryServiceClient: any = {
         postBreeder: jest.fn().mockRejectedValue(error),
+        postBreederContact: jest.fn().mockResolvedValue(breederContact),
         postBreederUser: jest.fn().mockResolvedValue(breederUser)
       }
       const mockAdvertisingServiceClient: any = {
@@ -255,7 +264,7 @@ describe('UserAggregator', () => {
       }
       const userAggregator = new UserAggregator(mockAccountServiceClient, mockPoultryServiceClient, mockAdvertisingServiceClient)
 
-      await expect(userAggregator.store).rejects.toThrow(error)
+      await expect(userAggregator.store({ user, breeder: {} })).rejects.toThrow(error)
 
       expect(mockAccountServiceClient.rollbackUser).toHaveBeenCalledTimes(1)
     })
@@ -264,6 +273,7 @@ describe('UserAggregator', () => {
       const breeder = {}
       const user = {}
       const merchant = {}
+      const breederContact = {}
       const error = new Error()
       const mockAccountServiceClient: any = {
         postUser: jest.fn().mockResolvedValue(user),
@@ -272,22 +282,25 @@ describe('UserAggregator', () => {
       const mockPoultryServiceClient: any = {
         postBreeder: jest.fn().mockResolvedValue(breeder),
         postBreederUser: jest.fn().mockRejectedValue(error),
-        rollbackBreeder: jest.fn()
+        postBreederContact: jest.fn().mockResolvedValue(breederContact),
+        rollbackBreeder: jest.fn(),
+        rollbackBreederContact: jest.fn()
       }
       const mockAdvertisingServiceClient: any = {
         postMerchant: jest.fn().mockResolvedValue(merchant)
       }
       const userAggregator = new UserAggregator(mockAccountServiceClient, mockPoultryServiceClient, mockAdvertisingServiceClient)
 
-      await expect(userAggregator.store).rejects.toThrow(error)
+      await expect(userAggregator.store({ breeder, user })).rejects.toThrow(error)
 
       expect(mockAccountServiceClient.rollbackUser).toHaveBeenCalledTimes(1)
       expect(mockPoultryServiceClient.rollbackBreeder).toHaveBeenCalledTimes(1)
     })
 
-    it('throwns an error when merchant post request gets an error', async () => {
-      const user = {}
+    it('throwns an error when breeder contact post request gets an error', async () => {
       const breeder = {}
+      const user = {}
+      const merchant = {}
       const breederUser = {}
       const error = new Error()
       const mockAccountServiceClient: any = {
@@ -297,19 +310,49 @@ describe('UserAggregator', () => {
       const mockPoultryServiceClient: any = {
         postBreeder: jest.fn().mockResolvedValue(breeder),
         postBreederUser: jest.fn().mockResolvedValue(breederUser),
+        postBreederContact: jest.fn().mockRejectedValue(error),
+        rollbackBreeder: jest.fn(),
+      }
+      const mockAdvertisingServiceClient: any = {
+        postMerchant: jest.fn().mockResolvedValue(merchant)
+      }
+      const userAggregator = new UserAggregator(mockAccountServiceClient, mockPoultryServiceClient, mockAdvertisingServiceClient)
+
+      await expect(userAggregator.store({ breeder, user })).rejects.toThrow(error)
+
+      expect(mockAccountServiceClient.rollbackUser).toHaveBeenCalledTimes(1)
+      expect(mockPoultryServiceClient.rollbackBreeder).toHaveBeenCalledTimes(1)
+    })
+
+    it('throwns an error when merchant post request gets an error', async () => {
+      const user = {}
+      const breeder = {}
+      const breederUser = {}
+      const breederContact = {}
+      const error = new Error()
+      const mockAccountServiceClient: any = {
+        postUser: jest.fn().mockResolvedValue(user),
+        rollbackUser: jest.fn()
+      }
+      const mockPoultryServiceClient: any = {
+        postBreeder: jest.fn().mockResolvedValue(breeder),
+        postBreederUser: jest.fn().mockResolvedValue(breederUser),
+        postBreederContact: jest.fn().mockResolvedValue(breederContact),
         rollbackBreederUser: jest.fn(),
         rollbackBreeder: jest.fn(),
+        rollbackBreederContact: jest.fn()
       }
       const mockAdvertisingServiceClient: any = {
         postMerchant: jest.fn().mockRejectedValue(error)
       }
       const userAggregator = new UserAggregator(mockAccountServiceClient, mockPoultryServiceClient, mockAdvertisingServiceClient)
 
-      await expect(userAggregator.store).rejects.toThrow(error)
+      await expect(userAggregator.store({ user, breeder })).rejects.toThrow(error)
 
       expect(mockAccountServiceClient.rollbackUser).toHaveBeenCalledTimes(1)
       expect(mockPoultryServiceClient.rollbackBreeder).toHaveBeenCalledTimes(1)
       expect(mockPoultryServiceClient.rollbackBreederUser).toHaveBeenCalledTimes(1)
+      expect(mockPoultryServiceClient.rollbackBreederContact).toHaveBeenCalledTimes(1)
     })
   })
 })

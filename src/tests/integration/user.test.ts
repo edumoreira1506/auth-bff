@@ -12,6 +12,7 @@ import UserAggregator from '@Aggregators/UserAggregator'
 import i18n from '@Configs/i18n'
 import TokenService from '@Services/TokenService'
 import AccountServiceClient from '@Clients/AccountServiceClient'
+import { BreederContactTypeEnum } from '@cig-platform/enums'
 
 describe('User actions', () => {
   describe('Authentication', () => {
@@ -74,11 +75,18 @@ describe('User actions', () => {
       const breeder = breederFactory({ description: 'fake description' })
       const breederUser = breederUserFactory({ userId: user.id, breederId: breeder.id })
       const merchant = merchantFactory()
-      const mockStore = jest.fn().mockResolvedValue({ user, breederUser, breeder, merchant })
+      const whatsApp = '(15) 99644-2031'
+      const contact = {
+        value: whatsApp,
+        type: BreederContactTypeEnum.WHATS_APP,
+        breederId: breeder.id,
+        id: faker.datatype.uuid()
+      }
+      const mockStore = jest.fn().mockResolvedValue({ user, breederUser, breeder, merchant, contact })
 
       jest.spyOn(UserAggregator, 'store').mockImplementation(mockStore)
 
-      const response = await request(App).post('/v1/users').send({ user, breeder, type: user.registerType })
+      const response = await request(App).post('/v1/users').send({ user, breeder, type: user.registerType, whatsApp })
       const userWithDateString = {
         ...user,
         birthDate: user?.birthDate?.toISOString(),
@@ -95,13 +103,19 @@ describe('User actions', () => {
         user: userWithDateString,
         breeder: breederWithDateString,
         breederUser,
-        merchant
+        merchant,
+        contact
       })
-      expect(mockStore).toHaveBeenCalledWith(userWithDateString, breederWithDateString, user.registerType, undefined)
+      expect(mockStore).toHaveBeenCalledWith({
+        user: userWithDateString,
+        breeder: breederWithDateString,
+        type: user.registerType,
+        whatsApp
+      })
     })
 
-    it('is na invalid register when does not send user', async () => {
-      const user = null
+    it('is na invalid register when does not send whatsApp', async () => {
+      const user = userFactory()
       const breeder = breederFactory({ description: 'fake description' })
 
       const response = await request(App).post('/v1/users').send({ user, breeder })
@@ -112,11 +126,25 @@ describe('User actions', () => {
       })
     })
 
+    it('is na invalid register when does not send user', async () => {
+      const user = null
+      const breeder = breederFactory({ description: 'fake description' })
+      const whatsApp = '(15) 99644-2031'
+
+      const response = await request(App).post('/v1/users').send({ user, breeder, whatsApp })
+
+      expect(response.statusCode).toBe(400)
+      expect(response.body).toMatchObject({
+        ok: false,
+      })
+    })
+
     it('is na invalid register when does not send breeder', async () => {
       const user = userFactory()
       const breeder = null
+      const whatsApp = '(15) 99644-2031'
 
-      const response = await request(App).post('/v1/users').send({ user, breeder })
+      const response = await request(App).post('/v1/users').send({ user, breeder, whatsApp })
 
       expect(response.statusCode).toBe(400)
       expect(response.body).toMatchObject({
@@ -128,30 +156,31 @@ describe('User actions', () => {
       const error = {}
       const user = userFactory()
       const breeder = breederFactory({ description: 'fake description' })
+      const whatsApp = '(15) 99644-2031'
       const mockStore = jest.fn().mockRejectedValue(error)
 
       jest.spyOn(UserAggregator, 'store').mockImplementation(mockStore)
 
-      const response = await request(App).post('/v1/users').send({ user, breeder, type: user.registerType })
+      const response = await request(App).post('/v1/users').send({ user, breeder, type: user.registerType, whatsApp })
 
       expect(response.statusCode).toBe(400)
       expect(response.body).toMatchObject({
         ok: false,
         error
       })
-      expect(mockStore).toHaveBeenCalledWith(
-        {
+      expect(mockStore).toHaveBeenCalledWith({
+        user: {
           ...user,
           birthDate: user?.birthDate?.toISOString()
         },
-        {
+        breeder: {
           ...breeder, 
           foundationDate: breeder?.foundationDate?.toISOString(),
           createdAt: breeder?.createdAt?.toISOString(),
         },
-        user.registerType,
-        undefined
-      )
+        type: user.registerType,
+        whatsApp
+      })
     })
   })
 
