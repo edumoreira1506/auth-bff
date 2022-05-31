@@ -4,12 +4,14 @@ import { AuthError, BaseController } from '@cig-platform/core'
 import UserAggregator from '@Aggregators/UserAggregator'
 import { AuthenticatedRequest } from '@Types/request'
 import i18n from '@Configs/i18n'
+import AccountServiceClient from '@Clients/AccountServiceClient'
 
 class UserController {
   constructor() {
     this.auth = this.auth.bind(this)
     this.store = this.store.bind(this)
     this.editPassword = this.editPassword.bind(this)
+    this.editProfile = this.editProfile.bind(this)
   }
 
   @BaseController.errorHandler()
@@ -58,6 +60,16 @@ class UserController {
     const { password, confirmPassword } = req.body
 
     await UserAggregator.editPassword(req.user.id, password, confirmPassword)
+  }
+
+  @BaseController.errorHandler()
+  @BaseController.actionHandler(i18n.__('messages.edit-profile.success'))
+  async editProfile(req: AuthenticatedRequest) {
+    if (!req.user) throw new AuthError()
+
+    const { user } = req.body
+
+    await AccountServiceClient.editUser(user, req.user.id)
   }
 }
 

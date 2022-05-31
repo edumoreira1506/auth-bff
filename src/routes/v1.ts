@@ -6,7 +6,8 @@ import {
   authUserSchema,
   recoverPasswordSchema,
   storeUserSchema,
-  editPasswordSchema
+  editPasswordSchema,
+  updateUserSchema
 } from '@Schemas/UserSchemas'
 import withTokenAuthorization from '@Middlewares/withTokenAuthoritzation'
 
@@ -21,5 +22,7 @@ router.post('/recover-password', withBodyValidation(recoverPasswordSchema), User
 router.post('/users', withBodyValidation(storeUserSchema), UserController.store)
 
 router.patch('/users/password', withTokenAuthorization, withBodyValidation(editPasswordSchema), UserController.editPassword)
+
+router.patch('/edit-profile', withTokenAuthorization, withBodyValidation(updateUserSchema), UserController.editProfile)
 
 export default router

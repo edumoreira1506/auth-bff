@@ -4,6 +4,7 @@ import {
   editPasswordSchema,
   recoverPasswordSchema,
   storeUserSchema,
+  updateUserSchema,
 } from '@Schemas/UserSchemas'
 
 const userDocs = {
@@ -45,6 +46,15 @@ const userDocs = {
       title: 'Edit password',
       description: 'Route to edit password',
       objectSchema: editPasswordSchema,
+      headerParams: [{ type: 'string', name: 'X-Cig-Token' }]
+    }
+  ]),
+  ...createDoc('/edit-profile', ['Users'], [
+    {
+      method: 'patch',
+      title: 'Edit profile',
+      description: 'Route to edit user profile',
+      objectSchema: updateUserSchema,
       headerParams: [{ type: 'string', name: 'X-Cig-Token' }]
     }
   ])
