@@ -25,4 +25,6 @@ router.patch('/users/password', withTokenAuthorization, withBodyValidation(editP
 
 router.patch('/edit-profile', withTokenAuthorization, withBodyValidation(updateUserSchema), UserController.editProfile)
 
+router.get('/profile-data', withTokenAuthorization, UserController.getUserData)
+
 export default router

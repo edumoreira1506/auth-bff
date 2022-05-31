@@ -57,6 +57,14 @@ const userDocs = {
       objectSchema: updateUserSchema,
       headerParams: [{ type: 'string', name: 'X-Cig-Token' }]
     }
+  ]),
+  ...createDoc('/profile-data', ['Users'], [
+    {
+      method: 'get',
+      title: 'Get profile data',
+      description: 'Route to get profile data',
+      headerParams: [{ type: 'string', name: 'X-Cig-Token' }]
+    }
   ])
 }
 

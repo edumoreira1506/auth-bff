@@ -12,6 +12,7 @@ class UserController {
     this.store = this.store.bind(this)
     this.editPassword = this.editPassword.bind(this)
     this.editProfile = this.editProfile.bind(this)
+    this.getUserData = this.getUserData.bind(this)
   }
 
   @BaseController.errorHandler()
@@ -70,6 +71,13 @@ class UserController {
     const { user } = req.body
 
     await AccountServiceClient.editUser(user, req.user.id)
+  }
+
+  @BaseController.errorHandler()
+  async getUserData(req: AuthenticatedRequest, res: Response) {
+    if (!req.user) throw new AuthError()
+
+    return BaseController.successResponse(res, { user: req.user })
   }
 }
 
