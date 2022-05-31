@@ -16,6 +16,6 @@
 	"emails.recover-password.title": "Recuperação de senha",
 	"emails.recover-password.content": "Sua senha é: {{password}}",
 	"messages.edit-password.success": "Senha editada com sucesso",
-	"user.fields.confirm-password": "user.fields.confirm-password",
+	"user.fields.confirm-password": "Confirmação de senha",
 	"must-be-equal": "must-be-equal"
 }
