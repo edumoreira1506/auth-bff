@@ -38,6 +38,10 @@ export const storeUserSchema = Joi.object({
   whatsApp: Joi.string().required()
 })
 
+export const updateUserSchema = Joi.object({
+  user: Joi.object().required()
+})
+
 export const recoverPasswordSchema = Joi.object({
   email: Joi.string().email().required().messages({
     'string.email': i18n.__('invalid-email', { field: i18n.__('user.fields.email') }),
