@@ -70,7 +70,7 @@ class UserController {
 
     const { user } = req.body
 
-    await AccountServiceClient.editUser(user, req.user.id)
+    await AccountServiceClient.updateUser(req.user.id, user)
   }
 
   @BaseController.errorHandler()
