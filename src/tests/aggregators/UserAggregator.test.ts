@@ -1,4 +1,4 @@
-import faker from '@faker-js/faker'
+import { faker } from '@faker-js/faker'
 import { userFactory, breederFactory, merchantFactory } from '@cig-platform/factories'
 import { IAdvertisingFavorite } from '@cig-platform/types'
 import { UserRegisterTypeEnum } from '@cig-platform/enums'
